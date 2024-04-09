@@ -13,7 +13,7 @@ class LoginViewModel : ViewModel() {
         _username.value = newUsername
     }
 
-    fun onLoginClicked() {
+    fun onLoginClicked(username: String, password: String) {
         // Actions to be performed on login click
         // For example, show a toast or navigate to another page
     }
