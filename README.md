@@ -1,6 +1,6 @@
 
 
-'''
+```
 ├── view
 │   ├──page      -- toutes les pages de l'app
 │   │   └── 
@@ -22,4 +22,4 @@
 │   └── strings  
 │   └── ...
 
-'''
+```
