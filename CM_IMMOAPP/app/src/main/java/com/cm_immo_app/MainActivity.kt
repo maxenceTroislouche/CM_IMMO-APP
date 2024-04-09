@@ -3,44 +3,19 @@ package com.cm_immo_app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.cm_immo_app.constants.CM_IMMOAPPTheme
+import com.cm_immo_app.view.page.LoginPage
+import com.cm_immo_app.viewmodel.LoginViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Initialisez votre ViewModel ici. Cela dépend de la manière dont vous gérez les instances de ViewModel.
+        // Pour simplifier, je crée une nouvelle instance, mais en réalité, vous voudrez peut-être utiliser ViewModelProvider ou un autre mécanisme de dépendance.
+        val loginViewModel = LoginViewModel()
+
         setContent {
-            CM_IMMOAPPTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
-                }
-            }
+            // Ici, nous appelons LoginPage. Vous pourriez envelopper cela dans votre thème si vous en avez un.
+            LoginPage(viewModel = loginViewModel)
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CM_IMMOAPPTheme {
-        Greeting("Android")
     }
 }

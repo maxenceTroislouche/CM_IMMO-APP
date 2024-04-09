@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">CM_IMMO-APP</string>
+    <string name="username">Username</string>
+    <string name="login">Login</string>
 </resources>
