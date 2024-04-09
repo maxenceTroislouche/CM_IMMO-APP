@@ -1,4 +1,4 @@
-package com.cm_immo_app.ui.theme
+package com.cm_immo_app.constants
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

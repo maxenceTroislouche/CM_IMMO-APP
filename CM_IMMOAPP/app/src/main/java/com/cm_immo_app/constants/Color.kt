@@ -1,4 +1,4 @@
-package com.cm_immo_app.ui.theme
+package com.cm_immo_app.constants
 
 import androidx.compose.ui.graphics.Color
 
