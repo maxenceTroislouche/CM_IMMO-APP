@@ -22,12 +22,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
 import androidx.navigation.NavController
 
-@ExperimentalMaterial3Api
 @Composable
 fun LoginPage(viewModel: LoginViewModel, navController: NavController) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    val textFieldColors = TextFieldDefaults.colors(
+        focusedContainerColor = Color(0xFFF5F4F8),
+        unfocusedContainerColor = Color(0xFFF5F4F8),
+        focusedIndicatorColor = Color(0xFF4CAF50),
+        unfocusedIndicatorColor = Color.Gray
+    )
 
     BoxWithConstraints {
         val gradient = Brush.radialGradient(
@@ -48,7 +54,7 @@ fun LoginPage(viewModel: LoginViewModel, navController: NavController) {
                     .padding(innerPadding)
                     .padding(horizontal = 200.dp, vertical = 50.dp)
                     .fillMaxWidth()
-                    .wrapContentSize(Alignment.Center)
+                    .fillMaxHeight()
             ) {
                 Text(
                     text = "Se connecter",
@@ -70,11 +76,7 @@ fun LoginPage(viewModel: LoginViewModel, navController: NavController) {
                     label = { Text(stringResource(id = R.string.username)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color(0xFFF5F4F8),
-                        focusedIndicatorColor = Color(0xFF4CAF50),
-                        unfocusedIndicatorColor = Color.Gray
-                    )
+                    colors = textFieldColors
                 )
                 Spacer(modifier = Modifier.height(35.dp))
                 TextField(
@@ -89,16 +91,12 @@ fun LoginPage(viewModel: LoginViewModel, navController: NavController) {
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color(0xFFF5F4F8),
-                        focusedIndicatorColor = Color(0xFF4CAF50),
-                        unfocusedIndicatorColor = Color.Gray
-                    )
+                    colors = textFieldColors
                 )
                 Spacer(modifier = Modifier.height(80.dp))
                 Button(
                     onClick = {
-                        // Navigate when the login is successful
+                        // TODO: Navigate when the login is successful
                         navController.navigate("PropertiesListPage")
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
