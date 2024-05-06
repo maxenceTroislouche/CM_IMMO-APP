@@ -57,7 +57,6 @@ fun LoginPage(viewModel: LoginViewModel, navController: NavController) {
                     style = MaterialTheme.typography.titleLarge, // Adjusted for Material3
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
-
                 Text(
                     text = "Se connecter sur la plateforme avec vos identifiants d'agent",
                     style = MaterialTheme.typography.bodySmall, // Adjusted for Material3
@@ -93,7 +92,8 @@ fun LoginPage(viewModel: LoginViewModel, navController: NavController) {
                 Button(
                     onClick = {
                         // TODO: Navigate when the login is successful
-                        navController.navigate("PropertiesListPage")
+
+                        navController.navigate("PropertiesListPage/12345")
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
                     modifier = Modifier
