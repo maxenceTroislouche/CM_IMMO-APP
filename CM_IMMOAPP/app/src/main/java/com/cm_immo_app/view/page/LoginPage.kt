@@ -34,17 +34,13 @@ fun LoginPage(viewModel: LoginViewModel, navController: NavController) {
         focusedIndicatorColor = Color(0xFF4CAF50),
         unfocusedIndicatorColor = Color.Gray
     )
+    val gradient = Brush.radialGradient(
+        colors = listOf(Color(0xFF1F4C6B), Color.Transparent),
+        center = Offset(1500f, 1800f),
+        radius = 800f
+    )
 
     BoxWithConstraints {
-        val gradient = Brush.radialGradient(
-            colors = listOf(
-                Color(0xFF1F4C6B),
-                Color.Transparent
-            ),
-            center = Offset(maxWidth.value, maxHeight.value * 1.5f), // position the circle lower
-            radius = maxWidth.value
-        )
-
         Scaffold(
             topBar = { LoginHeader() }
         ) { innerPadding ->
