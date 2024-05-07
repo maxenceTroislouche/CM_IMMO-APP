@@ -1,10 +1,11 @@
 package com.cm_immo_app.view.page
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -16,12 +17,15 @@ import com.cm_immo_app.R
 import com.cm_immo_app.view.components.LoginHeader
 import com.cm_immo_app.viewmodel.LoginViewModel
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
 import androidx.navigation.NavController
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun LoginPage(viewModel: LoginViewModel, navController: NavController) {
     var username by remember { mutableStateOf("") }
@@ -89,11 +93,17 @@ fun LoginPage(viewModel: LoginViewModel, navController: NavController) {
                     colors = textFieldColors
                 )
                 Spacer(modifier = Modifier.height(80.dp))
+
                 Button(
                     onClick = {
-                        // TODO: Navigate when the login is successful
-
-                        navController.navigate("PropertiesListPage/12345")
+                        // Navigate when the login is successful
+                        val token = viewModel.onLoginClicked(
+                            username = username,
+                            password = password
+                        )
+                        Log.i(TAG, "LoginPage: token <$token>")
+                        // Navigates to the propertiesListPage with the token of the estateagent
+                        navController.navigate("PropertiesListPage/$token")
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
                     modifier = Modifier
