@@ -1,5 +1,4 @@
 package com.cm_immo_app
-
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.os.Bundle
@@ -11,14 +10,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.cm_immo_app.view.page.LoginPage
-import com.cm_immo_app.view.page.PropertiesListPage
-import com.cm_immo_app.view.page.PropertyPage
-import com.cm_immo_app.view.page.ReviewPage
-import com.cm_immo_app.viewmodel.LoginViewModel
-import com.cm_immo_app.viewmodel.PropertiesListViewModel
-import com.cm_immo_app.viewmodel.PropertyViewModel
-import com.cm_immo_app.viewmodel.ReviewViewModel
+import com.cm_immo_app.view.page.*
+import com.cm_immo_app.viewmodel.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,3 +86,27 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+
+/*
+Test chlag du EDL Page
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val edlViewModel = EDLViewModel()
+
+        setContent {
+            // Fixer l'orientation de l'écran en portrait
+            val context = LocalContext.current
+            (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+            val navController = rememberNavController()
+            NavHost(navController, startDestination = "edl") {
+                composable("edl") {
+                    EDL(edlViewModel, navController)
+                }
+            }
+        }
+    }
+}
+*/
