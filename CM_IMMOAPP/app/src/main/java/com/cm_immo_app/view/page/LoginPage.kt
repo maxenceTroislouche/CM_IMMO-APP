@@ -20,6 +20,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -31,6 +32,15 @@ fun LoginPage(viewModel: LoginViewModel, navController: NavController) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    var isButtonClicked by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isButtonClicked) {
+        if (isButtonClicked) {
+            viewModel.getAuthToken(username, password)
+            navController.navigate("PropertiesListPage/${viewModel.token.value}")
+        }
+    }
 
     val textFieldColors = TextFieldDefaults.colors(
         focusedContainerColor = Color(0xFFF5F4F8),
@@ -95,16 +105,7 @@ fun LoginPage(viewModel: LoginViewModel, navController: NavController) {
                 Spacer(modifier = Modifier.height(80.dp))
 
                 Button(
-                    onClick = {
-                        // Navigate when the login is successful
-                        val token = viewModel.onLoginClicked(
-                            username = username,
-                            password = password
-                        )
-                        Log.i(TAG, "LoginPage: token <$token>")
-                        // Navigates to the propertiesListPage with the token of the estateagent
-                        navController.navigate("PropertiesListPage/$token")
-                    },
+                    onClick = { isButtonClicked = true },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
                     modifier = Modifier
                         .fillMaxWidth()
