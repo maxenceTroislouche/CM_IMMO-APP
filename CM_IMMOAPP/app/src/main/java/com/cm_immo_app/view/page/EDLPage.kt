@@ -1,7 +1,16 @@
 package com.cm_immo_app.view.page
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.with
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -72,6 +81,7 @@ fun EDL(viewModel: EDLViewModel, navController: NavController) {
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ConditionCards(
     cardIndex: Int,
@@ -83,65 +93,72 @@ fun ConditionCards(
 ) {
     val cardWidth = 600.dp
     var offsetX by remember { mutableStateOf(0f) }
-    val dismissRight = remember { mutableStateOf(false) }
-    val dismissLeft = remember { mutableStateOf(false) }
+    val dismissDirection = remember { mutableStateOf(0) } // 0: no dismiss, 1: right (next), -1: left (previous)
     val density = LocalDensity.current.density
 
-    LaunchedEffect(dismissRight.value) {
-        if (dismissRight.value) {
-            delay(300)
-            onCardSwiped(cardIndex + 1)
-            dismissRight.value = false
-        }
-    }
-
-    LaunchedEffect(dismissLeft.value) {
-        if (dismissLeft.value) {
-            delay(300)
-            onCardSwiped(cardIndex - 1)
-            dismissLeft.value = false
+    LaunchedEffect(dismissDirection.value) {
+        when (dismissDirection.value) {
+            1 -> {
+                delay(300)
+                onCardSwiped((cardIndex + 1) % titles.size)
+                dismissDirection.value = 0
+            }
+            -1 -> {
+                delay(300)
+                onCardSwiped((cardIndex - 1 + titles.size) % titles.size)
+                dismissDirection.value = 0
+            }
         }
     }
 
     val animatedOffset by animateFloatAsState(targetValue = offsetX, animationSpec = tween(300))
+    val animatedWidth by animateDpAsState(targetValue = if (offsetX == 0f) cardWidth else cardWidth - 50.dp)
 
     Box(
         modifier = Modifier
-            .width(600.dp)
+            .width(animatedWidth)
             .padding(16.dp)
             .pointerInput(Unit) {
                 detectHorizontalDragGestures(onDragEnd = {
                     offsetX = 0f
                 }) { change, dragAmount ->
                     offsetX += (dragAmount / density)
-                    when {
-                        offsetX > 300f -> {
-                            dismissRight.value = true
-                        }
-                        offsetX < -300f -> {
-                            dismissLeft.value = true
-                        }
-                    }
+                    if (offsetX > 300f) dismissDirection.value = 1
+                    if (offsetX < -300f) dismissDirection.value = -1
                     if (change.positionChange() != Offset.Zero) change.consume()
                 }
             }
             .graphicsLayer(
-                alpha = 10f - animateFloatAsState(if (dismissRight.value) 1f else 0f).value,
-                rotationZ = animateFloatAsState(offsetX / 50).value
+                alpha = 1f,
+                rotationZ = animatedOffset / 50
             )
     ) {
-        if (cardIndex < titles.size) {
-            val imageList = imagesList[cardIndex % imagesList.size]
-            ConditionCard(
-                viewModel,
-                navController,
-                titles[cardIndex],
-                imageList,
-                Modifier.offset { IntOffset(animatedOffset.roundToInt(), 0) }
-            )
+        AnimatedContent(
+            targetState = cardIndex,
+            transitionSpec = {
+                if (targetState > initialState) {
+                    slideInHorizontally { width -> width } + fadeIn() with
+                            slideOutHorizontally { width -> -width } + fadeOut()
+                } else {
+                    slideInHorizontally { width -> -width } + fadeIn() with
+                            slideOutHorizontally { width -> width } + fadeOut()
+                }.using(SizeTransform(clip = false))
+            }
+        ) { targetCardIndex ->
+            if (targetCardIndex < titles.size) {
+                val imageList = imagesList[targetCardIndex]
+                ConditionCard(
+                    viewModel,
+                    navController,
+                    titles[targetCardIndex],
+                    imageList,
+                    Modifier.offset { IntOffset(animatedOffset.roundToInt(), 0) }
+                )
+            }
         }
     }
 }
+
 
 @Composable
 fun ConditionCard(viewModel: EDLViewModel, navController: NavController, title: String, images: List<Int>,  modifier: Modifier = Modifier) {
