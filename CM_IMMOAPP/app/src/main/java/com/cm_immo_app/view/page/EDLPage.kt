@@ -1,13 +1,7 @@
 package com.cm_immo_app.view.page
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,10 +16,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.consumeAllChanges
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
@@ -33,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.cm_immo_app.viewmodel.EDLViewModel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
 @Composable
@@ -85,73 +82,63 @@ fun ConditionCards(
     onCardSwiped: (Int) -> Unit
 ) {
     val cardWidth = 600.dp
-    val offsetX = remember { Animatable(0f) }
-    val coroutineScope = rememberCoroutineScope()
-    val transitionState = remember { MutableTransitionState(false) }
+    var offsetX by remember { mutableStateOf(0f) }
+    val dismissRight = remember { mutableStateOf(false) }
+    val dismissLeft = remember { mutableStateOf(false) }
+    val density = LocalDensity.current.density
 
-    var remainingCards = remember { titles.size }
-
-    transitionState.targetState = remainingCards > 0
-    val cardModifier = Modifier
-        .width(cardWidth)
-        .height(420.dp)
-        .padding(16.dp)
-
-    LaunchedEffect(cardIndex) {
-        offsetX.animateTo(
-            targetValue = 0f,
-            animationSpec = tween(durationMillis = 300)
-        )
+    LaunchedEffect(dismissRight.value) {
+        if (dismissRight.value) {
+            delay(300)
+            onCardSwiped(cardIndex + 1)
+            dismissRight.value = false
+        }
     }
+
+    LaunchedEffect(dismissLeft.value) {
+        if (dismissLeft.value) {
+            delay(300)
+            onCardSwiped(cardIndex - 1)
+            dismissLeft.value = false
+        }
+    }
+
+    val animatedOffset by animateFloatAsState(targetValue = offsetX, animationSpec = tween(300))
 
     Box(
         modifier = Modifier
-            .fillMaxWidth()
+            .width(600.dp)
             .padding(16.dp)
             .pointerInput(Unit) {
-                detectHorizontalDragGestures { change, dragAmount ->
-                    change.consumeAllChanges()
-                    coroutineScope.launch {
-                        offsetX.snapTo(offsetX.value + dragAmount)
-                        val swipeThreshold = 300f
-                        if (Math.abs(offsetX.value) > swipeThreshold) {
-                            val direction = if (offsetX.value > 0) 1 else -1
-                            val newCardIndex = cardIndex + direction
-                            if (newCardIndex < titles.size && remainingCards > 0) {
-
-                                offsetX.animateTo(
-                                    targetValue = cardWidth.value * direction,
-                                    animationSpec = tween(500)
-                                )
-                                onCardSwiped(newCardIndex)
-                                remainingCards--
-                                offsetX.animateTo(
-                                    targetValue = 0f,
-                                    animationSpec = tween(300)
-                                )
-                            }
-                        } else {
-                            offsetX.animateTo(0f, tween(300))
+                detectHorizontalDragGestures(onDragEnd = {
+                    offsetX = 0f
+                }) { change, dragAmount ->
+                    offsetX += (dragAmount / density)
+                    when {
+                        offsetX > 300f -> {
+                            dismissRight.value = true
+                        }
+                        offsetX < -300f -> {
+                            dismissLeft.value = true
                         }
                     }
+                    if (change.positionChange() != Offset.Zero) change.consume()
                 }
             }
+            .graphicsLayer(
+                alpha = 10f - animateFloatAsState(if (dismissRight.value) 1f else 0f).value,
+                rotationZ = animateFloatAsState(offsetX / 50).value
+            )
     ) {
-        AnimatedVisibility(
-            visibleState = transitionState,
-            enter = fadeIn() + slideInHorizontally(initialOffsetX = { -cardWidth.value.toInt() }),
-            exit = fadeOut() + slideOutHorizontally(targetOffsetX = { cardWidth.value.toInt() }),
-        ) {
-            if (cardIndex < titles.size && remainingCards > 0) {
-                val imageList = imagesList[cardIndex % imagesList.size]
-                ConditionCard(
-                    viewModel,
-                    navController,
-                    titles[cardIndex],
-                    imageList,
-                    cardModifier.offset { IntOffset(offsetX.value.roundToInt(), 0) }
-                )
-            }
+        if (cardIndex < titles.size) {
+            val imageList = imagesList[cardIndex % imagesList.size]
+            ConditionCard(
+                viewModel,
+                navController,
+                titles[cardIndex],
+                imageList,
+                Modifier.offset { IntOffset(animatedOffset.roundToInt(), 0) }
+            )
         }
     }
 }
@@ -162,21 +149,8 @@ fun ConditionCard(viewModel: EDLViewModel, navController: NavController, title: 
     var showDialog by remember { mutableStateOf(false) }
     var selectedImage by remember { mutableStateOf<Int?>(null) }
 
-    // Swipe logic
-    var offsetX by remember { mutableStateOf(0f) }
-    val maxOffsetX = 300f
-
     Card(
-        modifier = Modifier
-            .width(600.dp)
-            .padding(20.dp)
-            .offset { IntOffset(offsetX.roundToInt(), 0) }
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures { change, dragAmount ->
-                    change.consumeAllChanges()
-                    offsetX = (offsetX + dragAmount).coerceIn(-maxOffsetX, maxOffsetX)
-                }
-            },
+        modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F4F8)),
         shape = RoundedCornerShape(20.dp)
     ) {
