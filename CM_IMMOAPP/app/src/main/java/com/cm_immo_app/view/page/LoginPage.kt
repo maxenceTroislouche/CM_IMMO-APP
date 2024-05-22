@@ -1,7 +1,5 @@
 package com.cm_immo_app.view.page
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -15,30 +13,31 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.cm_immo_app.R
 import com.cm_immo_app.view.components.LoginHeader
-import com.cm_immo_app.viewmodel.LoginViewModel
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
-import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import com.cm_immo_app.state.LoginState
 
-@OptIn(DelicateCoroutinesApi::class)
 @Composable
-fun LoginPage(viewModel: LoginViewModel, navController: NavController) {
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
+fun LoginPage(
+    state: LoginState,
+    setUsername: (username: String) -> Unit,
+    setPassword: (password: String) -> Unit,
+    connect: () -> Unit,
+    navigateToPropertiesList: (token: String) -> Unit,
+) {
+    val username = state.username
+    val password = state.password
+    val token = state.token
 
+    var passwordVisible by remember { mutableStateOf(false) }
     var isButtonClicked by remember { mutableStateOf(false) }
 
     LaunchedEffect(isButtonClicked) {
         if (isButtonClicked) {
-            viewModel.getAuthToken(username, password)
-            navController.navigate("PropertiesListPage/${viewModel.token.value}")
+            connect()
+            navigateToPropertiesList(token)
         }
     }
 
@@ -81,7 +80,7 @@ fun LoginPage(viewModel: LoginViewModel, navController: NavController) {
 
                 TextField(
                     value = username,
-                    onValueChange = { username = it },
+                    onValueChange = { setUsername(it) },
                     label = { Text(stringResource(id = R.string.username)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
@@ -90,7 +89,7 @@ fun LoginPage(viewModel: LoginViewModel, navController: NavController) {
                 Spacer(modifier = Modifier.height(35.dp))
                 TextField(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = { setPassword(it) },
                     label = { Text(stringResource(id = R.string.password)) },
                     singleLine = true,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),

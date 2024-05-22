@@ -10,6 +10,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.cm_immo_app.view.navigation.LoginNavigation
+import com.cm_immo_app.view.navigation.navigateToPropertiesList
 import com.cm_immo_app.view.page.*
 import com.cm_immo_app.viewmodel.*
 
@@ -25,63 +27,64 @@ class MainActivity : ComponentActivity() {
 
             val navController = rememberNavController()
             NavHost(navController, startDestination = "login") {
-                composable("login") {
-                    LoginPage(loginViewModel, navController)
-                }
-                composable(
-                    route = "PropertiesListPage/{token}",
-                    arguments = listOf(
-                        navArgument(name = "token") {
-                            type = NavType.StringType
-                        },
-                    )
-                ) { backstackEntry ->
-                    val token = backstackEntry.arguments?.getString("token")
-                    if (token != null) {
-                        val propertiesListViewModel = PropertiesListViewModel(token)
-                        PropertiesListPage(propertiesListViewModel, navController)
-                    }
-                }
-
-                // PropertyPage/{token}/{idProperty}
-                composable(
-                    route = "PropertyPage/{token}/{propertyId}",
-                    arguments = listOf(
-                        navArgument(name = "token") {
-                            type = NavType.StringType
-                        },
-                        navArgument(name = "propertyId") {
-                            type = NavType.StringType
-                        },
-                    )
-                ) { backstackEntry ->
-                    val token = backstackEntry.arguments?.getString("token")
-                    val idProperty = backstackEntry.arguments?.getString("propertyId")
-                    if (token != null && idProperty != null) {
-                        val propertyViewModel = PropertyViewModel(token, idProperty)
-                        PropertyPage(propertyViewModel, navController)
-                    }
-                }
-
-                // Review/{token}/{reviewId}
-                composable(
-                    route = "ReviewPage/{token}/{reviewId}",
-                    arguments = listOf(
-                        navArgument(name = "token") {
-                            type = NavType.StringType
-                        },
-                        navArgument(name = "reviewId") {
-                            type = NavType.StringType
-                        },
-                    ),
-                ) { backstackEntry ->
-                    val token = backstackEntry.arguments?.getString("token")
-                    val reviewId = backstackEntry.arguments?.getString("reviewId")
-                    if (token != null && reviewId != null) {
-                        val reviewViewModel = ReviewViewModel(token, reviewId)
-                        ReviewPage(reviewViewModel, navController)
-                    }
-                }
+                LoginNavigation(navController::navigateToPropertiesList)
+//                composable("login") {
+//                    LoginPage(loginViewModel, navController)
+//                }
+//                composable(
+//                    route = "PropertiesListPage/{token}",
+//                    arguments = listOf(
+//                        navArgument(name = "token") {
+//                            type = NavType.StringType
+//                        },
+//                    )
+//                ) { backstackEntry ->
+//                    val token = backstackEntry.arguments?.getString("token")
+//                    if (token != null) {
+//                        val propertiesListViewModel = PropertiesListViewModel(token)
+//                        PropertiesListPage(propertiesListViewModel, navController)
+//                    }
+//                }
+//
+//                // PropertyPage/{token}/{idProperty}
+//                composable(
+//                    route = "PropertyPage/{token}/{propertyId}",
+//                    arguments = listOf(
+//                        navArgument(name = "token") {
+//                            type = NavType.StringType
+//                        },
+//                        navArgument(name = "propertyId") {
+//                            type = NavType.StringType
+//                        },
+//                    )
+//                ) { backstackEntry ->
+//                    val token = backstackEntry.arguments?.getString("token")
+//                    val idProperty = backstackEntry.arguments?.getString("propertyId")
+//                    if (token != null && idProperty != null) {
+//                        val propertyViewModel = PropertyViewModel(token, idProperty)
+//                        PropertyPage(propertyViewModel, navController)
+//                    }
+//                }
+//
+//                // Review/{token}/{reviewId}
+//                composable(
+//                    route = "ReviewPage/{token}/{reviewId}",
+//                    arguments = listOf(
+//                        navArgument(name = "token") {
+//                            type = NavType.StringType
+//                        },
+//                        navArgument(name = "reviewId") {
+//                            type = NavType.StringType
+//                        },
+//                    ),
+//                ) { backstackEntry ->
+//                    val token = backstackEntry.arguments?.getString("token")
+//                    val reviewId = backstackEntry.arguments?.getString("reviewId")
+//                    if (token != null && reviewId != null) {
+//                        val reviewViewModel = ReviewViewModel(token, reviewId)
+//                        ReviewPage(reviewViewModel, navController)
+//                    }
+//                }
             }
         }
     }

@@ -1,56 +1,46 @@
 package com.cm_immo_app.viewmodel
 
-import android.content.ContentValues.TAG
-import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cm_immo_app.state.LoginState
 import com.cm_immo_app.utils.http.AuthFormData
-import com.cm_immo_app.utils.http.AuthService
 import com.cm_immo_app.utils.http.AuthTokenResponse
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.cm_immo_app.utils.http.RetrofitHelper
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.await
 
 class LoginViewModel : ViewModel() {
-    private val _username = MutableStateFlow("")
-    val username: StateFlow<String> = _username.asStateFlow()
 
-    fun onUsernameChanged(newUsername: String) {
-        _username.value = newUsername
+    private val _state: MutableState<LoginState> = mutableStateOf(LoginState())
+    val state: State<LoginState>
+        get() = _state
+
+    fun setUsername(username: String) {
+        _state.value = _state.value.copy(username = username)
     }
 
-    private val _token = MutableStateFlow<String?>(null)
-    var token: StateFlow<String?> = _token
+    fun setPassword(password: String) {
+        _state.value = _state.value.copy(password = password)
+    }
 
-    suspend fun getAuthToken(username: String, password: String) {
-        withContext(Dispatchers.IO) {
-            val retrofit = Retrofit.Builder()
-                .baseUrl("http://192.168.1.5:3000/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
+    fun setToken(token: String) {
+        _state.value = _state.value.copy(token = token)
+    }
 
-            val service = retrofit.create(AuthService::class.java)
-            val authFormData = AuthFormData(
-                username = username,
-                password = password,
+    fun connect() {
+        viewModelScope.launch {
+            val authFormData: AuthFormData = AuthFormData(
+                username = state.value.username,
+                password = state.value.password,
             )
+            val authTokenResponse: AuthTokenResponse = RetrofitHelper.authService.signin(
+                authFormData = authFormData
+            ).await()
 
-            val call: Call<AuthTokenResponse> = service.signin(authFormData)
-            val response: Response<AuthTokenResponse> = call.execute()
-
-            if (response.isSuccessful) {
-                // Requête réussie!
-                _token.value = response.body()?.access_token
-            } else {
-                Log.e(TAG, "onLoginClicked: Echec lors de la récupération du token {${response.code()}: ${response.message()}}", )
-            }
+            setToken(authTokenResponse.access_token)
         }
     }
 }
