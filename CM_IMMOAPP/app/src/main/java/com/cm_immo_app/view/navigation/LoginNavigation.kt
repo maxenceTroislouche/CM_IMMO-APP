@@ -11,10 +11,10 @@ import com.cm_immo_app.viewmodel.LoginViewModel
 const val LoginRoute = "login"
 
 fun NavGraphBuilder.LoginNavigation(
+    loginViewModel: LoginViewModel,
     navigateToPropertiesList: (token: String) -> Unit,
 ) {
     composable(LoginRoute) {
-        val loginViewModel: LoginViewModel = LoginViewModel()
         val state: LoginState by loginViewModel.state
         LoginPage(
             state = state,

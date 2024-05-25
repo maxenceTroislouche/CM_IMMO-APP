@@ -29,6 +29,10 @@ import com.cm_immo_app.viewmodel.PropertiesListViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PropertiesListPage(viewModel: PropertiesListViewModel, navController: NavController) {
+    LaunchedEffect(Unit) {
+        viewModel.getProperties()
+    }
+
     val properties = viewModel.properties.collectAsState().value
     val token = viewModel.token
 
@@ -72,7 +76,8 @@ fun PropertiesListPage(viewModel: PropertiesListViewModel, navController: NavCon
                 modifier = Modifier.padding(12.dp)
             ) {
                 items(properties) { property ->
-                    PropertyCard(property, navController, token)
+                    Text(text = "${property.id} / ${property.name}")
+                    // PropertyCard(property, navController, token)
                 }
             }
         }
@@ -89,7 +94,6 @@ fun PropertyCard(property: PropertySimple, navController: NavController, token: 
             .height(360.dp),
         shape = RoundedCornerShape(12.dp),
         onClick = {
-            // TODO: Navigate when the login is successful
             navController.navigate("PropertyPage/$token/${property.id}")
         },
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
@@ -101,14 +105,15 @@ fun PropertyCard(property: PropertySimple, navController: NavController, token: 
                     .fillMaxWidth()
                     .padding(10.dp)
             ) {
+                /*
                 Image(
-                    painter = painterResource(id = property.imageId),
+                    painter = painterResource(id = property.ImageUrl),
                     contentDescription = property.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(RoundedCornerShape(10.dp))
-                )
+                )*/
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)

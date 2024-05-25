@@ -1,5 +1,6 @@
 package com.cm_immo_app.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +20,7 @@ class LoginViewModel : ViewModel() {
         get() = _state
 
     fun setUsername(username: String) {
+        Log.i("LoginPage", username)
         _state.value = _state.value.copy(username = username)
     }
 

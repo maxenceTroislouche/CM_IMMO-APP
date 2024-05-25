@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
 
             val navController = rememberNavController()
             NavHost(navController, startDestination = "login") {
-                LoginNavigation(navController::navigateToPropertiesList)
+                LoginNavigation(LoginViewModel(), navController::navigateToPropertiesList)
 //                composable("login") {
 //                    LoginPage(loginViewModel, navController)
 //                }

@@ -4,6 +4,6 @@ data class PropertySimple(
     val id: String,
     val name: String,
     val completion: Int,
-    val imageId: Int,
+    val ImageUrl: String,
     val location: String
 )
