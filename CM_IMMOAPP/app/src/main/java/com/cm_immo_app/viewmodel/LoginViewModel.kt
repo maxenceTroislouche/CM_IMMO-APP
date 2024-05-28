@@ -10,7 +10,10 @@ import com.cm_immo_app.state.LoginState
 import com.cm_immo_app.utils.http.AuthFormData
 import com.cm_immo_app.utils.http.AuthTokenResponse
 import com.cm_immo_app.utils.http.RetrofitHelper
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import retrofit2.Response
 import retrofit2.await
 
 class LoginViewModel : ViewModel() {
@@ -33,16 +36,26 @@ class LoginViewModel : ViewModel() {
     }
 
     fun connect() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val authFormData: AuthFormData = AuthFormData(
                 username = state.value.username,
                 password = state.value.password,
             )
-            val authTokenResponse: AuthTokenResponse = RetrofitHelper.authService.signin(
+            val authTokenResponse: Response<AuthTokenResponse> = RetrofitHelper.authService.signin(
                 authFormData = authFormData
-            ).await()
+            ).execute()
 
-            setToken(authTokenResponse.access_token)
+            var navigated: Boolean = false
+            if (authTokenResponse.isSuccessful) {
+                val token = authTokenResponse.body()?.access_token
+                if (token != null) {
+                    setToken(token)
+                    navigated = true
+                }
+            }
+            if (!navigated) {
+                Log.e("LoginViewModel", "Echec de la connexion")
+            }
         }
     }
 }

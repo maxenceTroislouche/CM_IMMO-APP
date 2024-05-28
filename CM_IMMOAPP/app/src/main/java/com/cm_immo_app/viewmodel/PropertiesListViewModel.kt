@@ -3,59 +3,71 @@ package com.cm_immo_app.viewmodel
 import android.content.ContentValues
 import android.content.ContentValues.TAG
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.cm_immo_app.R
+import androidx.lifecycle.viewModelScope
 import com.cm_immo_app.models.PropertySimple
-import com.cm_immo_app.utils.http.AuthFormData
-import com.cm_immo_app.utils.http.AuthService
-import com.cm_immo_app.utils.http.AuthTokenResponse
+import com.cm_immo_app.state.PropertiesListState
+import com.cm_immo_app.utils.http.PropertiesListResponse
 import com.cm_immo_app.utils.http.PropertiesResponseData
 import com.cm_immo_app.utils.http.PropertiesService
+import com.cm_immo_app.utils.http.RetrofitHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.Properties
 
-class PropertiesListViewModel(var token: String) : ViewModel() {
-    private val _properties = MutableStateFlow(mutableListOf<PropertySimple>())
-    val properties: StateFlow<MutableList<PropertySimple>> = _properties.asStateFlow()
+class PropertiesListViewModel() : ViewModel() {
+    private val _state: MutableState<PropertiesListState> = mutableStateOf(PropertiesListState())
+    val state: State<PropertiesListState>
+        get() = _state
 
-    suspend fun getProperties() {
-        withContext(Dispatchers.IO) {
-            val retrofit = Retrofit.Builder()
-                .baseUrl("http://192.168.1.5:3000/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
+    /**
+     * Setter pour le token car on a besoin d'initialiser l'objet PropertiesListViewModel sans
+     * qu'on connaisse le token
+     */
+    fun setToken(newToken: String) {
+        // Mise à jour du token
+        _state.value = _state.value.copy(token = newToken)
+    }
 
-            val service = retrofit.create(PropertiesService::class.java)
-            val call: Call<List<PropertiesResponseData>> = service.getProperties("Bearer $token")
-            val response: Response<List<PropertiesResponseData>> = call.execute()
+    fun getProperties() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val call: Call<List<PropertiesListResponse>> = RetrofitHelper
+                .propertyService
+                .getProperties("Bearer ${state.value.token}")
 
+
+            val response: Response<List<PropertiesListResponse>> = call.execute()
             val newList: MutableList<PropertySimple> = mutableListOf()
 
             if (response.isSuccessful) {
-                // Requête réussie!
                 response.body()?.forEach {
                     newList.add(
                         PropertySimple(
                             it.id.toString(),
-                        "${it.typeBien} ${it.nomProprietaire} ${it.prenomProprietaire}",
+                            "${it.typeBien} ${it.nomProprietaire} ${it.prenomProprietaire}",
                             it.pourcentageAvancement,
                             it.photos.get(0),
                             it.nomProprietaire
                         )
                     )
                 }
+
                 Log.e(TAG, "getProperties: $newList")
-                _properties.value = newList.toMutableList()
+                // Copie de la liste pour mettre à jour le state
+                _state.value = _state.value.copy(properties = newList.toMutableList())
             } else {
-                Log.e(ContentValues.TAG, "PropertiesList: Echec lors de la récupération du token {${response.code()}: ${response.message()}}", )
+                Log.e(ContentValues.TAG, "PropertiesList: Echec lors de la récupération des biens pour : ${state.value.token}")
             }
         }
     }

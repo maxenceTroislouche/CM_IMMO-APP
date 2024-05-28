@@ -31,15 +31,15 @@ fun LoginPage(
     val password = state.password
     val token = state.token
 
-    var passwordVisible by remember { mutableStateOf(false) }
-    var isButtonClicked by remember { mutableStateOf(false) }
-
-    LaunchedEffect(isButtonClicked) {
-        if (isButtonClicked) {
-            connect()
+    // Observe changes to the state variable
+    LaunchedEffect(token) {
+        // Navigate to the login screen if the state is "logged_out"
+        if (token != "") {
             navigateToPropertiesList(token)
         }
     }
+
+    var passwordVisible by remember { mutableStateOf(false) }
 
     val textFieldColors = TextFieldDefaults.colors(
         focusedContainerColor = Color(0xFFF5F4F8),
@@ -104,7 +104,7 @@ fun LoginPage(
                 Spacer(modifier = Modifier.height(80.dp))
 
                 Button(
-                    onClick = { isButtonClicked = true },
+                    onClick = { connect() },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -112,6 +112,8 @@ fun LoginPage(
                 ) {
                     Text("Se connecter")
                 }
+                
+                Text(text = "Mon token : $token")
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.cm_immo_app.view.navigation
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -11,9 +12,9 @@ import com.cm_immo_app.viewmodel.LoginViewModel
 const val LoginRoute = "login"
 
 fun NavGraphBuilder.LoginNavigation(
-    loginViewModel: LoginViewModel,
     navigateToPropertiesList: (token: String) -> Unit,
 ) {
+    val loginViewModel = LoginViewModel()
     composable(LoginRoute) {
         val state: LoginState by loginViewModel.state
         LoginPage(
@@ -24,8 +25,4 @@ fun NavGraphBuilder.LoginNavigation(
             navigateToPropertiesList = navigateToPropertiesList,
         )
     }
-}
-
-fun NavController.navigateToPropertiesList(token: String) {
-    navigate(route = "PropertiesListPage/$token")
 }

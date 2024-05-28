@@ -21,26 +21,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.cm_immo_app.R
 import com.cm_immo_app.models.PropertySimple
-import com.cm_immo_app.viewmodel.PropertiesListViewModel
+import com.cm_immo_app.state.PropertiesListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PropertiesListPage(viewModel: PropertiesListViewModel, navController: NavController) {
-    LaunchedEffect(Unit) {
-        viewModel.getProperties()
-    }
-
-    val properties = viewModel.properties.collectAsState().value
-    val token = viewModel.token
+fun PropertiesListPage(
+    state: PropertiesListState,
+    navigateToPropertiesPage: (token: String, propertyId: Int) -> Unit,
+    getProperties: () -> Unit,
+) {
+    val properties = state.properties
+    val token = state.token
 
     val gradient = Brush.radialGradient(
         colors = listOf(Color(0xFF1F4C6B), Color.Transparent),
         center = Offset(1500f, 1800f),
         radius = 800f
     )
+
+    LaunchedEffect(token) {
+        getProperties()
+    }
 
     Scaffold(
         topBar = {
@@ -86,7 +89,10 @@ fun PropertiesListPage(viewModel: PropertiesListViewModel, navController: NavCon
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PropertyCard(property: PropertySimple, navController: NavController, token: String) {
+fun PropertyCard(property: PropertySimple,
+                 navigateToPropertiesPage: (token: String, propertyId: Int) -> Unit,
+                 token: String
+) {
     Card(
         modifier = Modifier
             .padding(12.dp)
@@ -94,7 +100,7 @@ fun PropertyCard(property: PropertySimple, navController: NavController, token: 
             .height(360.dp),
         shape = RoundedCornerShape(12.dp),
         onClick = {
-            navController.navigate("PropertyPage/$token/${property.id}")
+            navigateToPropertiesPage(token, property.id.toInt())
         },
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {

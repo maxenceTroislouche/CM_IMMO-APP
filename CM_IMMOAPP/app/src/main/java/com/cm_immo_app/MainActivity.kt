@@ -11,14 +11,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.cm_immo_app.view.navigation.LoginNavigation
+import com.cm_immo_app.view.navigation.PropertiesListNavigation
+import com.cm_immo_app.view.navigation.PropertyNavigation
+import com.cm_immo_app.view.navigation.ReviewNavigation
 import com.cm_immo_app.view.navigation.navigateToPropertiesList
+import com.cm_immo_app.view.navigation.navigateToPropertiesPage
 import com.cm_immo_app.view.page.*
 import com.cm_immo_app.viewmodel.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val loginViewModel = LoginViewModel()
 
         setContent {
             // Fixer l'orientation de l'écran en portrait
@@ -27,25 +30,12 @@ class MainActivity : ComponentActivity() {
 
             val navController = rememberNavController()
             NavHost(navController, startDestination = "login") {
-                LoginNavigation(LoginViewModel(), navController::navigateToPropertiesList)
-//                composable("login") {
-//                    LoginPage(loginViewModel, navController)
-//                }
-//                composable(
-//                    route = "PropertiesListPage/{token}",
-//                    arguments = listOf(
-//                        navArgument(name = "token") {
-//                            type = NavType.StringType
-//                        },
-//                    )
-//                ) { backstackEntry ->
-//                    val token = backstackEntry.arguments?.getString("token")
-//                    if (token != null) {
-//                        val propertiesListViewModel = PropertiesListViewModel(token)
-//                        PropertiesListPage(propertiesListViewModel, navController)
-//                    }
-//                }
-//
+                LoginNavigation(navController::navigateToPropertiesList)
+                PropertiesListNavigation(navController::navigateToPropertiesPage)
+                PropertyNavigation()
+                ReviewNavigation()
+
+
 //                // PropertyPage/{token}/{idProperty}
 //                composable(
 //                    route = "PropertyPage/{token}/{propertyId}",

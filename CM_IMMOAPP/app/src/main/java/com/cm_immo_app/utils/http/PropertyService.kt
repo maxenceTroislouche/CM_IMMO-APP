@@ -15,5 +15,5 @@ data class PropertiesListResponse(
 
 interface PropertyService {
     @GET("immotepAPI/v1/properties")
-    fun getProperties(@Header("authorization") token: String): Call<PropertiesListResponse>
+    fun getProperties(@Header("authorization") token: String): Call<List<PropertiesListResponse>>
 }
