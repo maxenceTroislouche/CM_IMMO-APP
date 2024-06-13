@@ -19,6 +19,7 @@ import com.cm_immo_app.view.navigation.navigateToPropertiesPage
 import com.cm_immo_app.view.page.*
 import com.cm_immo_app.viewmodel.*
 
+/*
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,25 +82,45 @@ class MainActivity : ComponentActivity() {
 }
 
 
-/*
+
 Test chlag du EDL Page
+*/
+
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+
 class MainActivity : ComponentActivity() {
+    private val CAMERA_PERMISSION_REQUEST_CODE = 101
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val edlViewModel = EDLViewModel()
 
-        setContent {
-            // Fixer l'orientation de l'écran en portrait
-            val context = LocalContext.current
-            (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        if (allPermissionsGranted()) {
+            setContent {
+                // Fixer l'orientation de l'écran en portrait
+                val context = LocalContext.current
+                (context as? Activity)?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
-            val navController = rememberNavController()
-            NavHost(navController, startDestination = "edl") {
-                composable("edl") {
-                    EDL(edlViewModel, navController)
+                val navController = rememberNavController()
+                NavHost(navController, startDestination = "edl") {
+                    composable("edl") {
+                        EDL(edlViewModel, navController)
+                    }
                 }
             }
+        } else {
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, CAMERA_PERMISSION_REQUEST_CODE)
         }
     }
+
+    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
+    }
+
+    companion object {
+        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+    }
 }
-*/
