@@ -37,13 +37,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.navigation.NavController
 import com.cm_immo_app.viewmodel.EDLViewModel
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
 @Composable
-fun EDL(viewModel: EDLViewModel, navController: NavController) {
+fun EDL(viewModel: EDLViewModel) {
     val scrollState = rememberScrollState()
     var cardIndex by remember { mutableStateOf(0) }
     val titles = listOf("État des Murs", "État du Sol")
@@ -75,7 +74,7 @@ fun EDL(viewModel: EDLViewModel, navController: NavController) {
                 .padding(start = 16.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
-        ConditionCards(cardIndex, titles, images, viewModel, navController) { newIndex ->
+        ConditionCards(cardIndex, titles, images, viewModel) { newIndex ->
             cardIndex = newIndex % titles.size
         }
     }
@@ -88,7 +87,6 @@ fun ConditionCards(
     titles: List<String>,
     imagesList: List<List<Int>>,
     viewModel: EDLViewModel,
-    navController: NavController,
     onCardSwiped: (Int) -> Unit
 ) {
     val cardWidth = 600.dp
@@ -149,7 +147,6 @@ fun ConditionCards(
                 val imageList = imagesList[targetCardIndex]
                 ConditionCard(
                     viewModel,
-                    navController,
                     titles[targetCardIndex],
                     imageList,
                     Modifier.offset { IntOffset(animatedOffset.roundToInt(), 0) }
@@ -161,7 +158,7 @@ fun ConditionCards(
 
 
 @Composable
-fun ConditionCard(viewModel: EDLViewModel, navController: NavController, title: String, images: List<Int>,  modifier: Modifier = Modifier) {
+fun ConditionCard(viewModel: EDLViewModel, title: String, images: List<Int>,  modifier: Modifier = Modifier) {
     val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
     var selectedImage by remember { mutableStateOf<Int?>(null) }

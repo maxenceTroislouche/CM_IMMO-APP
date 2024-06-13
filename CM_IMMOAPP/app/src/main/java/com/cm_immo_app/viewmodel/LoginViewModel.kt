@@ -36,17 +36,23 @@ class LoginViewModel : ViewModel() {
     }
 
     fun connect() {
+        Log.i("Auth", "Connexion ...")
         viewModelScope.launch(Dispatchers.IO) {
             val authFormData: AuthFormData = AuthFormData(
                 username = state.value.username,
                 password = state.value.password,
             )
+
+            Log.i("Auth", "avant execute")
             val authTokenResponse: Response<AuthTokenResponse> = RetrofitHelper.authService.signin(
                 authFormData = authFormData
             ).execute()
 
+            Log.i("Auth", "Envoyé")
+
             var navigated: Boolean = false
             if (authTokenResponse.isSuccessful) {
+                Log.i("Auth", "OK ! ${authTokenResponse.body()}")
                 val token = authTokenResponse.body()?.access_token
                 if (token != null) {
                     setToken(token)

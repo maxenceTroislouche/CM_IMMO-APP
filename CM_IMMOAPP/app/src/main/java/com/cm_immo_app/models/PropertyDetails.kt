@@ -3,14 +3,14 @@ package com.cm_immo_app.models
 import java.util.Date
 
 data class PropertyDetails(
-    val id: String,
+    val id: Int,
     val propertyType: String,
     val city: String,
     val postalCode: String,
     val progressPercentage: Float,
-    val reviewId: String,
+    val reviewId: Int,
     val reviewType: String,
-    val contractId: String,
+    val contractId: Int,
     val numberOfRooms: Int,
     val streetNumber: Int,
     val streetName: String,
@@ -18,7 +18,7 @@ data class PropertyDetails(
     val latitude: Float,
     val description: String,
     val contracts: List<Contract>,
-    val photos: List<Unit>, // TODO: Comment faire marcher les photos
+    val photos: List<String>,
 )
 
 data class Contract(

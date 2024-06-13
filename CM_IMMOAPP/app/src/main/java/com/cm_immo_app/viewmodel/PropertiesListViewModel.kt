@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cm_immo_app.models.PropertySimple
 import com.cm_immo_app.state.PropertiesListState
-import com.cm_immo_app.utils.http.PropertiesListResponse
+import com.cm_immo_app.utils.http.PropertiesResponseData
 import com.cm_immo_app.utils.http.RetrofitHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,12 +33,12 @@ class PropertiesListViewModel() : ViewModel() {
 
     fun getProperties() {
         viewModelScope.launch(Dispatchers.IO) {
-            val call: Call<List<PropertiesListResponse>> = RetrofitHelper
+            val call: Call<List<PropertiesResponseData>> = RetrofitHelper
                 .propertyService
                 .getProperties("Bearer ${state.value.token}")
 
 
-            val response: Response<List<PropertiesListResponse>> = call.execute()
+            val response: Response<List<PropertiesResponseData>> = call.execute()
             val newList: MutableList<PropertySimple> = mutableListOf()
 
             if (response.isSuccessful) {

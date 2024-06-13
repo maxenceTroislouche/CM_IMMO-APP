@@ -11,3 +11,8 @@ fun NavController.navigateToPropertiesList(token: String) {
     Log.i("Login", "token: $token")
     navigate(route = "PropertiesListPage/$token")
 }
+
+fun NavController.navigateToInventoryPage(token: String, inventoryId: Int) {
+    Log.i("NavigateToInventoryPage", "token: $token / inventoryId: $inventoryId")
+    navigate(route = "InventoryPage/$token/$inventoryId")
+}
