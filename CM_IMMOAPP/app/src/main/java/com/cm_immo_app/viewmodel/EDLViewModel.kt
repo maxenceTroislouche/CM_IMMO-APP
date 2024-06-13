@@ -1,7 +1,10 @@
 package com.cm_immo_app.viewmodel
 
+import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -53,12 +56,18 @@ class EDLViewModel : ViewModel() {
     fun capturePhoto(context: Context, onImageCaptured: (Uri) -> Unit) {
         val imageCapture = imageCapture ?: return
 
-        val photoFile = File(
-            context.externalMediaDirs.first(),
-            SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US).format(System.currentTimeMillis()) + ".jpg"
-        )
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US).format(System.currentTimeMillis()) + ".jpg")
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/YourAppName")
+        }
 
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(
+            context.contentResolver,
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            contentValues
+        ).build()
+
         imageCapture.takePicture(
             outputOptions,
             ContextCompat.getMainExecutor(context),
@@ -68,7 +77,7 @@ class EDLViewModel : ViewModel() {
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    val savedUri = Uri.fromFile(photoFile)
+                    val savedUri = output.savedUri ?: Uri.EMPTY
                     Log.d("EDLViewModel", "Photo capture succeeded: $savedUri")
                     onImageCaptured(savedUri)
                 }
