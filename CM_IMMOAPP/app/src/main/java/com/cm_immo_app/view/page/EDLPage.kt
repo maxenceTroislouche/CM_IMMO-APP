@@ -20,6 +20,7 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
+import com.cm_immo_app.R
 import com.cm_immo_app.viewmodel.EDLViewModel
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
@@ -95,7 +97,7 @@ fun ConditionCards(
 ) {
     val cardWidth = 600.dp
     var offsetX by remember { mutableStateOf(0f) }
-    val dismissDirection = remember { mutableStateOf(0) } // 0: no dismiss, 1: right (next), -1: left (previous)
+    val dismissDirection = remember { mutableStateOf(0) }
     val density = LocalDensity.current.density
 
     LaunchedEffect(dismissDirection.value) {
@@ -211,12 +213,19 @@ fun ConditionCard(viewModel: EDLViewModel, title: String, images: List<Int>,  mo
             }
 
             Spacer(modifier = Modifier.height(25.dp))
+            CaptureButton {
+                viewModel.capturePhoto(context) { uri ->
+                    // Handle the captured photo URI here if needed
+                }
+            }
+            Spacer(modifier = Modifier.height(25.dp))
             EmojiFeedback(viewModel)
             Spacer(modifier = Modifier.height(25.dp))
             NoteSection(viewModel)
         }
     }
 }
+
 
 @Composable
 fun ImageFullScreenDialog(imageId: Int, onDismiss: () -> Unit) {
@@ -268,3 +277,28 @@ fun NoteSection(viewModel: EDLViewModel) {
         )
     )
 }
+
+@Composable
+fun CaptureButton(onCaptureClick: () -> Unit) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        FloatingActionButton(
+            onClick = onCaptureClick,
+            shape = CircleShape,
+            containerColor = Color(0xFF8BC83F),
+            contentColor = Color.White,
+            modifier = Modifier.size(70.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.camera), // Update with your camera icon resource ID
+                contentDescription = "Capture Photo",
+                tint = Color.White
+            )
+        }
+    }
+}
+
