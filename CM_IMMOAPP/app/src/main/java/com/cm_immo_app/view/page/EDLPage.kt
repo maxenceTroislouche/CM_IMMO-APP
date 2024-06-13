@@ -1,5 +1,7 @@
 package com.cm_immo_app.view.page
 
+import android.view.View
+import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
@@ -32,10 +34,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import com.cm_immo_app.viewmodel.EDLViewModel
 import kotlinx.coroutines.delay
@@ -162,6 +166,7 @@ fun ConditionCard(viewModel: EDLViewModel, title: String, images: List<Int>,  mo
     val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
     var selectedImage by remember { mutableStateOf<Int?>(null) }
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     Card(
         modifier = modifier,
@@ -181,7 +186,10 @@ fun ConditionCard(viewModel: EDLViewModel, title: String, images: List<Int>,  mo
                     .fillMaxWidth()
                     .background(Color.Gray, shape = RoundedCornerShape(12.dp))
             ) {
-                Text("Camera View Placeholder", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.align(Alignment.Center))
+                val previewView = remember { PreviewView(context).apply { id = View.generateViewId() } }
+                AndroidView({ previewView }) { view ->
+                    viewModel.startCamera(context, lifecycleOwner, view)
+                }
                 Row(modifier = Modifier.horizontalScroll(rememberScrollState()).align(Alignment.TopStart).padding(8.dp)) {
                     images.forEach { image ->
                         Image(
