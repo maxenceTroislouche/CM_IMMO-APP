@@ -11,20 +11,11 @@ import androidx.lifecycle.viewModelScope
 import com.cm_immo_app.models.PropertySimple
 import com.cm_immo_app.state.PropertiesListState
 import com.cm_immo_app.utils.http.PropertiesListResponse
-import com.cm_immo_app.utils.http.PropertiesResponseData
-import com.cm_immo_app.utils.http.PropertiesService
 import com.cm_immo_app.utils.http.RetrofitHelper
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import java.util.Properties
 
 class PropertiesListViewModel() : ViewModel() {
     private val _state: MutableState<PropertiesListState> = mutableStateOf(PropertiesListState())
@@ -57,7 +48,7 @@ class PropertiesListViewModel() : ViewModel() {
                             it.id.toString(),
                             "${it.typeBien} ${it.nomProprietaire} ${it.prenomProprietaire}",
                             it.pourcentageAvancement,
-                            it.photos.get(0),
+                            it.photos[0],
                             it.nomProprietaire
                         )
                     )
@@ -67,7 +58,8 @@ class PropertiesListViewModel() : ViewModel() {
                 // Copie de la liste pour mettre à jour le state
                 _state.value = _state.value.copy(properties = newList.toMutableList())
             } else {
-                Log.e(ContentValues.TAG, "PropertiesList: Echec lors de la récupération des biens pour : ${state.value.token}")
+                Log.e(ContentValues.TAG, "PropertiesList: Echec lors de la récupération des biens pour : ${state.value.token} / ${response.errorBody()
+                    ?.string()}")
             }
         }
     }
