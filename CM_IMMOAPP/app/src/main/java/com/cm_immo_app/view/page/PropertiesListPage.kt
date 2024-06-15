@@ -1,5 +1,6 @@
 package com.cm_immo_app.view.page
 
+import androidx.camera.core.AspectRatio
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -10,9 +11,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -22,6 +25,7 @@ import coil.compose.AsyncImage
 import com.cm_immo_app.R
 import com.cm_immo_app.models.PropertySimple
 import com.cm_immo_app.state.PropertiesListState
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,9 +91,10 @@ fun PropertiesListPage(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PropertyCard(property: PropertySimple,
-                 navigateToPropertiesPage: (token: String, propertyId: Int) -> Unit,
-                 token: String
+fun PropertyCard(
+    property: PropertySimple,
+    navigateToPropertiesPage: (token: String, propertyId: Int) -> Unit,
+    token: String
 ) {
     Card(
         modifier = Modifier
@@ -105,13 +110,17 @@ fun PropertyCard(property: PropertySimple,
         Column {
             Box(
                 modifier = Modifier
-                    .height(300.dp)
+                    .height(260.dp)
                     .fillMaxWidth()
-                    .padding(10.dp)
+                    .padding(12.dp)
             ) {
                 AsyncImage(
                     model = property.ImageUrl,
-                    contentDescription = property.name
+                    contentDescription = property.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(12.dp))
                 )
                 Box(
                     modifier = Modifier
@@ -133,7 +142,7 @@ fun PropertyCard(property: PropertySimple,
             }
             Column(
                 modifier = Modifier
-                    .padding(horizontal = 20.dp, vertical = 2.dp)
+                    .padding(horizontal = 20.dp, vertical = 8.dp)
             ) {
                 Text(
                     text = property.name,

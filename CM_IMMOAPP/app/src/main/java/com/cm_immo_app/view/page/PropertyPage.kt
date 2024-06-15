@@ -26,7 +26,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -42,12 +41,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.cm_immo_app.models.PropertyDetails
 import com.cm_immo_app.state.PropertyState
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,12 +62,6 @@ fun PropertyPage(
 
     LaunchedEffect(key1 = token, key2 = idProperty) {
         getPropertyData()
-    }
-
-    LaunchedEffect(propertyData) {
-        if (propertyData != null && propertyData.photos.isNotEmpty()) {
-            selectedImage = propertyData.photos.first()
-        }
     }
 
     Scaffold(
@@ -114,8 +106,8 @@ fun PropertyPage(
                 ) {
                     Card(
                         modifier = Modifier
-                            .width(150.dp) // 3 times smaller
-                            .height(150.dp) // 3 times smaller
+                            .width(150.dp)
+                            .height(150.dp)
                             .clip(RoundedCornerShape(16.dp))
                     ) {
                         AsyncImage(
@@ -180,7 +172,7 @@ fun PropertyPage(
 
 @Composable
 fun PropertyDetails(property: PropertyDetails) {
-    Column(modifier = Modifier.padding(vertical = 16.dp)) { // Adjusted padding
+    Column(modifier = Modifier.padding(vertical = 16.dp)) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
@@ -225,7 +217,7 @@ fun PropertyDetails(property: PropertyDetails) {
 
 @Composable
 fun PropertyLocation(property: PropertyDetails) {
-    Column(modifier = Modifier.padding(vertical = 16.dp)) { // Adjusted padding
+    Column(modifier = Modifier.padding(vertical = 16.dp)) {
         Text(
             text = "Localisation",
             style = MaterialTheme.typography.titleMedium,
@@ -236,7 +228,7 @@ fun PropertyLocation(property: PropertyDetails) {
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-        // Replace this with an actual Google Maps composable if available
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -260,7 +252,7 @@ fun PropertyLocation(property: PropertyDetails) {
 
 @Composable
 fun PropertyDescription(property: PropertyDetails) {
-    Column(modifier = Modifier.padding(vertical = 16.dp)) { // Adjusted padding
+    Column(modifier = Modifier.padding(vertical = 16.dp)) {
         Text(
             text = "Details du bien",
             style = MaterialTheme.typography.titleMedium,
@@ -283,7 +275,7 @@ fun PropertyDescription(property: PropertyDetails) {
 
 @Composable
 fun PropertyContracts(property: PropertyDetails) {
-    Column(modifier = Modifier.padding(vertical = 16.dp)) { // Adjusted padding
+    Column(modifier = Modifier.padding(vertical = 16.dp)) {
         Text(
             text = "Historique de baux",
             style = MaterialTheme.typography.titleMedium,
@@ -328,4 +320,3 @@ fun PropertyContracts(property: PropertyDetails) {
         )
     }
 }
-
