@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
                     navigateToInventoryPage = { token, inventoryId ->
                         navController.navigate("inventoryPage/$token/$inventoryId")
                     },
-                    navigateBack = { navController.popBackStack() } // Pass the navigateBack function
+                    navigateBack = { navController.popBackStack() }
                 )
                 InventoryNavigation()
             }

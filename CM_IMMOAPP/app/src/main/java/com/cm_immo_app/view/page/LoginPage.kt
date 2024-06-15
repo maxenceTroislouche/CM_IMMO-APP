@@ -1,5 +1,6 @@
 package com.cm_immo_app.view.page
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -19,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
 import com.cm_immo_app.state.LoginState
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun LoginPage(
     state: LoginState,
@@ -67,7 +69,7 @@ fun LoginPage(
             ) {
                 Text(
                     text = "Se connecter",
-                    style = MaterialTheme.typography.titleLarge, // Adjusted for Material3
+                    style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
                 Text(
@@ -112,7 +114,7 @@ fun LoginPage(
                 ) {
                     Text("Se connecter")
                 }
-                
+
                 Text(text = "Mon token : $token")
             }
         }

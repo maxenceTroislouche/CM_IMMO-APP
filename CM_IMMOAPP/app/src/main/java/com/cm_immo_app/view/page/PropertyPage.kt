@@ -41,7 +41,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.cm_immo_app.models.PropertyDetails
 import com.cm_immo_app.state.PropertyState
@@ -156,12 +158,17 @@ fun PropertyPage(
                 Button(
                     onClick = { navigateToInventoryPage(token, property.reviewId) },
                     modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
+                        .padding(30.dp)
+                        .width(300.dp)
+                        .align(Alignment.CenterHorizontally),
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8BC83F))
                 ) {
-                    Text(text = if (property.progressPercentage == 0f) "Commencer l'état des lieux" else "Reprendre l'état des lieux")
+                    Text(
+                        text = if (property.progressPercentage == 0f) "Commencer l'état des lieux" else "Reprendre l'état des lieux",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
                 }
             } ?: run {
                 Text("Loading...", modifier = Modifier.padding(16.dp))
@@ -291,9 +298,10 @@ fun PropertyContracts(property: PropertyDetails) {
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Mr. ${contract.OwnerLastName} ${contract.OwnerFirstName}",
+                        text = "${contract.OwnerLastName} ${contract.OwnerFirstName}",
                         style = MaterialTheme.typography.bodyLarge,
                         color = Color.White,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
                     Text(

@@ -16,9 +16,9 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import com.cm_immo_app.R
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
+
 
 class EDLViewModel : ViewModel() {
     var progress: Float = 0.5f
@@ -59,7 +59,7 @@ class EDLViewModel : ViewModel() {
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US).format(System.currentTimeMillis()) + ".jpg")
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/YourAppName")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/IMMOTEP")
         }
 
         val outputOptions = ImageCapture.OutputFileOptions.Builder(
@@ -84,4 +84,6 @@ class EDLViewModel : ViewModel() {
             }
         )
     }
+
 }
+
