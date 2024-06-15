@@ -12,7 +12,8 @@ import com.cm_immo_app.viewmodel.PropertyViewModel
 import kotlin.system.exitProcess
 
 fun NavGraphBuilder.PropertyNavigation(
-    navigateToInventoryPage: (token: String, inventoryId: Int) -> Unit
+    navigateToInventoryPage: (token: String, inventoryId: Int) -> Unit,
+    navigateBack: () -> Unit // Add navigateBack parameter
 ) {
     val propertyViewModel = PropertyViewModel()
 
@@ -26,7 +27,7 @@ fun NavGraphBuilder.PropertyNavigation(
                 type = NavType.IntType
             },
         )
-    ) {backstackEntry ->
+    ) { backstackEntry ->
         val token = backstackEntry.arguments?.getString("token")
         if (token == null) {
             Log.e("PropertyNavigation", "pas de token défini")
@@ -45,6 +46,7 @@ fun NavGraphBuilder.PropertyNavigation(
         val state: PropertyState by propertyViewModel.state
         PropertyPage(
             state = state,
+            navigateBack = navigateBack, // Pass the navigateBack function
             navigateToInventoryPage = navigateToInventoryPage,
             getPropertyData = propertyViewModel::getPropertyData,
         )

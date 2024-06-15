@@ -1,4 +1,5 @@
 package com.cm_immo_app
+
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.os.Bundle
@@ -18,7 +19,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-
 
 class MainActivity : ComponentActivity() {
     private val CAMERA_PERMISSION_REQUEST_CODE = 101
@@ -40,7 +40,12 @@ class MainActivity : ComponentActivity() {
             NavHost(navController, startDestination = "login") {
                 LoginNavigation(navController::navigateToPropertiesList)
                 PropertiesListNavigation(navController::navigateToPropertiesPage)
-                PropertyNavigation(navController::navigateToInventoryPage)
+                PropertyNavigation(
+                    navigateToInventoryPage = { token, inventoryId ->
+                        navController.navigate("inventoryPage/$token/$inventoryId")
+                    },
+                    navigateBack = { navController.popBackStack() } // Pass the navigateBack function
+                )
                 InventoryNavigation()
             }
         }
