@@ -1,6 +1,5 @@
 package com.cm_immo_app.view.page
 
-import android.util.Log
 import android.view.View
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedContent
@@ -18,7 +17,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -47,8 +45,9 @@ import com.cm_immo_app.R
 import com.cm_immo_app.viewmodel.EDLViewModel
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
-
 import androidx.compose.ui.graphics.Brush
+
+
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ConditionCards(
@@ -198,20 +197,24 @@ fun ConditionCard(viewModel: EDLViewModel, title: String, images: List<Int>, mod
                 modifier = Modifier
                     .height(700.dp)
                     .fillMaxWidth()
-                    .background(Color.Gray, shape = RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.Gray)
             ) {
                 val previewView = remember { PreviewView(context).apply { id = View.generateViewId() } }
-                AndroidView({ previewView }) { view ->
+                AndroidView(
+                    factory = { previewView },
+                    modifier = Modifier.fillMaxSize()
+                ) { view ->
                     viewModel.startCamera(context, lifecycleOwner, view)
                 }
-                Row(modifier = Modifier.horizontalScroll(rememberScrollState()).align(Alignment.TopStart).padding(8.dp)) {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState()).align(Alignment.TopStart).padding(8.dp)) {
                     images.forEach { image ->
                         Image(
                             painter = painterResource(id = image),
                             contentDescription = "Thumbnail",
                             modifier = Modifier
-                                .size(50.dp)
-                                .padding(end = 8.dp)
+                                .size(100.dp)
+                                .padding(8.dp)
                                 .clickable {
                                     selectedImage = image
                                     showDialog = true
@@ -231,6 +234,7 @@ fun ConditionCard(viewModel: EDLViewModel, title: String, images: List<Int>, mod
         }
     }
 }
+
 
 @Composable
 fun CaptureButton(onCaptureClick: () -> Unit) {
