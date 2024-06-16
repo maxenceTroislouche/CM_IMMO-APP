@@ -114,8 +114,6 @@ fun LoginPage(
                 ) {
                     Text("Se connecter")
                 }
-
-                Text(text = "Mon token : $token")
             }
         }
     }
