@@ -131,7 +131,9 @@ fun ImageFullScreenDialog(imageId: Int, onDismiss: () -> Unit) {
             Image(
                 painter = painterResource(id = imageId),
                 contentDescription = "Full-screen image",
-                modifier = Modifier.fillMaxSize().clickable { onDismiss() }
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable { onDismiss() }
             )
         }
     }
@@ -186,7 +188,9 @@ fun ConditionCard(viewModel: EDLViewModel, title: String, images: List<Int>, mod
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F4F8)),
         shape = RoundedCornerShape(20.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp).fillMaxHeight()) {
+        Column(modifier = Modifier
+            .padding(16.dp)
+            .fillMaxHeight()) {
             Text(
                 title,
                 style = MaterialTheme.typography.headlineMedium,
@@ -207,7 +211,10 @@ fun ConditionCard(viewModel: EDLViewModel, title: String, images: List<Int>, mod
                 ) { view ->
                     viewModel.startCamera(context, lifecycleOwner, view)
                 }
-                Column(modifier = Modifier.verticalScroll(rememberScrollState()).align(Alignment.TopStart).padding(8.dp)) {
+                Column(modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .align(Alignment.TopStart)
+                    .padding(8.dp)) {
                     images.forEach { image ->
                         Image(
                             painter = painterResource(id = image),
@@ -267,6 +274,10 @@ fun EDL(viewModel: EDLViewModel) {
     val titles = listOf("État des Murs", "État du Sol")
     val images = listOf(viewModel.wallImages, viewModel.wallImages)
     val context = LocalContext.current
+
+    LaunchedEffect(images) {
+
+    }
 
     // Dégradé de fond
     val gradient = Brush.verticalGradient(

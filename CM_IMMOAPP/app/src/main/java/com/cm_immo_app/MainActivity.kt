@@ -12,7 +12,6 @@ import com.cm_immo_app.view.navigation.InventoryNavigation
 import com.cm_immo_app.view.navigation.LoginNavigation
 import com.cm_immo_app.view.navigation.PropertiesListNavigation
 import com.cm_immo_app.view.navigation.PropertyNavigation
-import com.cm_immo_app.view.navigation.navigateToInventoryPage
 import com.cm_immo_app.view.navigation.navigateToPropertiesList
 import com.cm_immo_app.view.navigation.navigateToPropertiesPage
 import android.Manifest

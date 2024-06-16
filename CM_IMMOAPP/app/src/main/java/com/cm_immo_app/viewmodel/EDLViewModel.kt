@@ -12,12 +12,17 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cm_immo_app.R
+import com.cm_immo_app.state.InventoryState
 import com.cm_immo_app.utils.http.ImageData
+import com.cm_immo_app.utils.http.MinuteUpdate
 import com.cm_immo_app.utils.http.RetrofitHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,16 +34,41 @@ import kotlin.system.exitProcess
 
 
 class EDLViewModel : ViewModel() {
+    private val _state: MutableState<InventoryState> = mutableStateOf(InventoryState())
+    val state: State<InventoryState>
+        get() = _state
+
+    /*
     var progress: Float = 0.5f
     var roomName: String = "Couloir, Commencer état des lieux"
     var wallImages: List<Int> = listOf(R.drawable.house_boone)
-    var emojis: List<String> = listOf("🙂", "😐", "😞", "😡", "😄", "🤩")
+    var emojis: List<String> = listOf("😡", "😞", "😐",  "🙂", "😄", "🤩")
     var selectedEmoji: String? = null
-
+    */
     private var imageCapture: ImageCapture? = null
 
-    fun onEmojiSelected(emoji: String) {
-        selectedEmoji = emoji
+    fun setProgress(progress: Float) {
+        _state.value = _state.value.copy(progress = progress)
+    }
+
+    fun setRoomName(roomName: String) {
+        _state.value = _state.value.copy(roomName = roomName)
+    }
+
+    fun setWallImages(wallImages: List<String>) {
+        _state.value = _state.value.copy(wallImages = wallImages)
+    }
+
+    fun setSelectedEmoji(selectedEmoji: String) {
+        _state.value = _state.value.copy(selectedEmoji = selectedEmoji)
+    }
+
+    fun setToken(token: String) {
+        _state.value = _state.value.copy(token = token)
+    }
+
+    fun setInventoryId(inventoryId: Int) {
+        _state.value = _state.value.copy(inventoryId = inventoryId)
     }
 
     private fun getRealPathFromURI(context: Context, uri: Uri): String? {
@@ -140,6 +170,14 @@ class EDLViewModel : ViewModel() {
             val response = call.execute()
             Log.i("EDLViewmodel", "$response")
         }
+    }
+
+    fun updateMinute(minute: MinuteUpdate) {
+        viewModelScope.launch(Dispatchers.IO) {
+            Log.i("EDLViewmodel", "$minute")
+        }
+
+        // TODO: continuer la fonction
     }
 }
 

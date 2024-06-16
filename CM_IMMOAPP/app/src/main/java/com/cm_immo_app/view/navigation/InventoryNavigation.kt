@@ -34,6 +34,8 @@ fun NavGraphBuilder.InventoryNavigation() {
             exitProcess(-1)
         }
 
+        // TODO: Ajouter le token et l'id d'edl dans le viewmodel
+
         EDL(edlViewModel)
     }
 }
