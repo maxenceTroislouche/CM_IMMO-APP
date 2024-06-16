@@ -6,7 +6,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object RetrofitHelper {
     private val retrofitClient: Retrofit = Retrofit.Builder()
         .addConverterFactory(GsonConverterFactory.create())
-        .baseUrl("http://192.168.1.5:3000")
+        .baseUrl("https://api.taffin.ovh")
         .build()
 
     val authService: AuthService = retrofitClient.create(AuthService::class.java)
