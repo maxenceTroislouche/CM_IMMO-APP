@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.cm_immo_app.models.PropertyDetails
 import com.cm_immo_app.state.PropertyState
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,11 +60,18 @@ fun PropertyPage(
 ) {
     val token = state.token
     val idProperty = state.propertyId
-    val propertyData = state.property
-    var selectedImage by remember { mutableStateOf(propertyData?.photos?.firstOrNull()) }
+    var propertyData by remember { mutableStateOf<PropertyDetails?>(null) }
+    var selectedImage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(key1 = token, key2 = idProperty) {
         getPropertyData()
+    }
+
+    LaunchedEffect(key1 = state.property) {
+        state.property?.let { property ->
+            propertyData = property
+            selectedImage = property.photos.firstOrNull()
+        }
     }
 
     Scaffold(
@@ -92,86 +100,107 @@ fun PropertyPage(
             )
         }
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 45.dp)
-                .verticalScroll(rememberScrollState())
-                .fillMaxHeight()
         ) {
-            propertyData?.let { property ->
-                Box(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Card(
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 45.dp)
+                    .verticalScroll(rememberScrollState())
+                    .fillMaxSize()
+            ) {
+                propertyData?.let { property ->
+                    Box(
                         modifier = Modifier
-                            .width(150.dp)
-                            .height(150.dp)
-                            .clip(RoundedCornerShape(16.dp))
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        AsyncImage(
-                            model = selectedImage,
-                            contentDescription = property.description,
+                        Card(
                             modifier = Modifier
-                                .fillMaxSize()
+                                .fillMaxWidth()
+                                .height(400.dp)
                                 .clip(RoundedCornerShape(16.dp))
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(8.dp)
-                    ) {
-                        property.photos.forEach { imageUrl ->
+                        ) {
                             AsyncImage(
-                                model = imageUrl,
-                                contentDescription = null,
+                                model = selectedImage,
+                                contentDescription = property.description,
                                 modifier = Modifier
-                                    .width(50.dp)
-                                    .height(50.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable { selectedImage = imageUrl }
-                                    .padding(4.dp)
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(16.dp))
                             )
                         }
+
+                        Row(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(8.dp)
+                        ) {
+                            property.photos.forEach { imageUrl ->
+                                AsyncImage(
+                                    model = imageUrl,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .width(50.dp)
+                                        .height(50.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .clickable { selectedImage = imageUrl }
+                                        .padding(4.dp)
+                                )
+                            }
+                        }
                     }
+                    Text(
+                        text = property.propertyType.toString(),
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(start = 16.dp, top = 8.dp)
+                    )
+                    Text(
+                        text = "${property.progressPercentage} %",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                    )
+                    PropertyDetails(property)
+                    PropertyLocation(property)
+                    PropertyDescription(property)
+                    PropertyContracts(property)
+                } ?: run {
+                    Text("Loading...", modifier = Modifier.padding(16.dp))
                 }
-                Text(
-                    text = property.id.toString(),
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = 16.dp, top = 8.dp)
-                )
-                Text(
-                    text = "${property.progressPercentage} %",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                )
-                PropertyDetails(property)
-                PropertyLocation(property)
-                PropertyDescription(property)
-                PropertyContracts(property)
-                Spacer(modifier = Modifier.weight(1f))
+            }
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.7f),
+                                Color.White.copy(alpha = 1.0f)
+                            ),
+                            startY = 0f,
+                            endY = 400f
+                        )
+                    )
+            ) {
                 Button(
-                    onClick = { navigateToInventoryPage(token, property.reviewId) },
+                    onClick = { propertyData?.let { navigateToInventoryPage(token, it.reviewId) } },
                     modifier = Modifier
                         .padding(30.dp)
                         .width(300.dp)
-                        .align(Alignment.CenterHorizontally),
+                        .align(Alignment.Center),
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8BC83F))
                 ) {
                     Text(
-                        text = if (property.progressPercentage == 0f) "Commencer l'état des lieux" else "Reprendre l'état des lieux",
+                        text = if (propertyData?.progressPercentage == 0f) "Commencer l'état des lieux" else "Reprendre l'état des lieux",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
                     )
                 }
-            } ?: run {
-                Text("Loading...", modifier = Modifier.padding(16.dp))
             }
         }
     }
@@ -326,5 +355,6 @@ fun PropertyContracts(property: PropertyDetails) {
                 .align(Alignment.CenterHorizontally)
                 .padding(vertical = 8.dp)
         )
+        Spacer(modifier = Modifier.height(200.dp))
     }
 }
