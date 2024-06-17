@@ -5,7 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.cm_immo_app.view.page.EDL
+import com.cm_immo_app.view.page.InventoryPage
 import com.cm_immo_app.viewmodel.EDLViewModel
 import kotlin.system.exitProcess
 
@@ -34,8 +34,9 @@ fun NavGraphBuilder.InventoryNavigation() {
             exitProcess(-1)
         }
 
-        // TODO: Ajouter le token et l'id d'edl dans le viewmodel
+        edlViewModel.setToken(token)
+        edlViewModel.setInventoryId(inventoryId)
 
-        EDL(edlViewModel)
+        InventoryPage(edlViewModel)
     }
 }
