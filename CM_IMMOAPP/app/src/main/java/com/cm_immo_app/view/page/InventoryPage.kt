@@ -45,94 +45,17 @@ import com.cm_immo_app.R
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LifecycleOwner
 import coil.compose.AsyncImage
 import com.cm_immo_app.state.InventoryState
 import com.cm_immo_app.utils.http.MinuteUpdate
 
-
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun ConditionCards(
-    cardIndex: Int,
-    titles: List<String>,
-    imagesList: List<List<String>>,
-    state: InventoryState,
-    startCamera: (context: Context, lifecycleOwner: LifecycleOwner, previewView: PreviewView) -> Unit,
-    setSelectedEmoji: (selectedEmoji: String) -> Unit,
-    onCardSwiped: (Int) -> Unit
+fun ImageFullScreenDialog(
+    imageString: String,
+    onDismiss: () -> Unit
 ) {
-    val cardWidth = 600.dp
-    var offsetX by remember { mutableStateOf(0f) }
-    val dismissDirection = remember { mutableStateOf(0) }
-    val density = LocalDensity.current.density
-
-    LaunchedEffect(dismissDirection.value) {
-        when (dismissDirection.value) {
-            1 -> {
-                delay(300)
-                onCardSwiped((cardIndex + 1) % titles.size)
-                dismissDirection.value = 0
-            }
-            -1 -> {
-                delay(300)
-                onCardSwiped((cardIndex - 1 + titles.size) % titles.size)
-                dismissDirection.value = 0
-            }
-        }
-    }
-
-    val animatedOffset by animateFloatAsState(targetValue = offsetX, animationSpec = tween(300))
-    val animatedWidth by animateDpAsState(targetValue = if (offsetX == 0f) cardWidth else cardWidth - 50.dp)
-
-    Box(
-        modifier = Modifier
-            .width(animatedWidth)
-            .padding(16.dp)
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures(onDragEnd = {
-                    offsetX = 0f
-                }) { change, dragAmount ->
-                    offsetX += (dragAmount / density)
-                    if (offsetX > 300f) dismissDirection.value = 1
-                    if (offsetX < -300f) dismissDirection.value = -1
-                    if (change.positionChange() != Offset.Zero) change.consume()
-                }
-            }
-            .graphicsLayer(
-                alpha = 1f,
-                rotationZ = animatedOffset / 50
-            )
-    ) {
-        AnimatedContent(
-            targetState = cardIndex,
-            transitionSpec = {
-                if (targetState > initialState) {
-                    slideInHorizontally { width -> width } + fadeIn() with
-                            slideOutHorizontally { width -> -width } + fadeOut()
-                } else {
-                    slideInHorizontally { width -> -width } + fadeIn() with
-                            slideOutHorizontally { width -> width } + fadeOut()
-                }.using(SizeTransform(clip = false))
-            }
-        ) { targetCardIndex ->
-            if (targetCardIndex < titles.size) {
-                val imageList = imagesList[targetCardIndex]
-                ConditionCard(
-                    state,
-                    startCamera,
-                    setSelectedEmoji,
-                    titles[targetCardIndex],
-                    imageList,
-                    Modifier.offset { IntOffset(animatedOffset.roundToInt(), 0) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun ImageFullScreenDialog(imageString: String, onDismiss: () -> Unit) {
     Dialog(onDismissRequest = { onDismiss() }) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             AsyncImage(
@@ -147,20 +70,47 @@ fun ImageFullScreenDialog(imageString: String, onDismiss: () -> Unit) {
 }
 
 @Composable
-fun EmojiFeedback(state: InventoryState, setSelectedEmoji: (selectedEmoji: String) -> Unit) {
+fun EmojiFeedback(
+    state: InventoryState,
+    setSelectedEmoji: (selectedEmoji: String) -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         state.emojis.forEach { emoji ->
-            Text(
-                text = emoji,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.clickable {
-                    setSelectedEmoji(emoji)
-                }
-            )
+            val isSelected = emoji == state.selectedEmoji
+            Box(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(if (isSelected) Color.LightGray else Color.Transparent)
+                    .clickable {
+                        setSelectedEmoji(emoji)
+                    }
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = emoji,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontSize = if (isSelected) 24.sp else 16.sp
+                    )
+                )
+            }
         }
+    }
+}
+
+@Composable
+fun EmojiFeedbackSection(
+    state: InventoryState,
+    setSelectedEmoji: (selectedEmoji: String) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        EmojiFeedback(state, setSelectedEmoji)
     }
 }
 
@@ -249,13 +199,12 @@ fun ConditionCard(
             }
 
             Spacer(modifier = Modifier.height(25.dp))
-            EmojiFeedback(state, setSelectedEmoji)
+            EmojiFeedbackSection(state, setSelectedEmoji)
             Spacer(modifier = Modifier.height(25.dp))
             NoteSection(state)
         }
     }
 }
-
 
 @Composable
 fun CaptureButton(onCaptureClick: () -> Unit) {
@@ -277,6 +226,86 @@ fun CaptureButton(onCaptureClick: () -> Unit) {
                 contentDescription = "Capture Photo",
                 tint = Color.White
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun ConditionCards(
+    cardIndex: Int,
+    titles: List<String>,
+    imagesList: List<List<String>>,
+    state: InventoryState,
+    startCamera: (context: Context, lifecycleOwner: LifecycleOwner, previewView: PreviewView) -> Unit,
+    setSelectedEmoji: (selectedEmoji: String) -> Unit,
+    onCardSwiped: (Int) -> Unit
+) {
+    val cardWidth = 600.dp
+    var offsetX by remember { mutableStateOf(0f) }
+    val dismissDirection = remember { mutableStateOf(0) }
+    val density = LocalDensity.current.density
+
+    LaunchedEffect(dismissDirection.value) {
+        when (dismissDirection.value) {
+            1 -> {
+                delay(300)
+                onCardSwiped((cardIndex + 1) % titles.size)
+                dismissDirection.value = 0
+            }
+            -1 -> {
+                delay(300)
+                onCardSwiped((cardIndex - 1 + titles.size) % titles.size)
+                dismissDirection.value = 0
+            }
+        }
+    }
+
+    val animatedOffset by animateFloatAsState(targetValue = offsetX, animationSpec = tween(300))
+    val animatedWidth by animateDpAsState(targetValue = if (offsetX == 0f) cardWidth else cardWidth - 50.dp)
+
+    Box(
+        modifier = Modifier
+            .width(animatedWidth)
+            .padding(16.dp)
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(onDragEnd = {
+                    offsetX = 0f
+                }) { change, dragAmount ->
+                    offsetX += (dragAmount / density)
+                    if (offsetX > 300f) dismissDirection.value = 1
+                    if (offsetX < -300f) dismissDirection.value = -1
+                    if (change.positionChange() != Offset.Zero) change.consume()
+                }
+            }
+            .graphicsLayer(
+                alpha = 1f,
+                rotationZ = animatedOffset / 50
+            )
+    ) {
+        AnimatedContent(
+            targetState = cardIndex,
+            transitionSpec = {
+                if (targetState > initialState) {
+                    slideInHorizontally { width -> width } + fadeIn() with
+                            slideOutHorizontally { width -> -width } + fadeOut()
+                } else {
+                    slideInHorizontally { width -> -width } + fadeIn() with
+                            slideOutHorizontally { width -> width } + fadeOut()
+                }.using(SizeTransform(clip = false))
+            }
+        ) { targetCardIndex ->
+            if (targetCardIndex < titles.size) {
+                val imageList = imagesList[targetCardIndex]
+                ConditionCard(
+                    state,
+                    startCamera,
+                    setSelectedEmoji,
+                    titles[targetCardIndex],
+                    imageList,
+                    Modifier.offset { IntOffset(animatedOffset.roundToInt(), 0) }
+                )
+            }
         }
     }
 }

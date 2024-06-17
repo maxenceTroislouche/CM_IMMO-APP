@@ -19,7 +19,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cm_immo_app.R
 import com.cm_immo_app.state.InventoryState
 import com.cm_immo_app.utils.http.ImageData
 import com.cm_immo_app.utils.http.MinuteUpdate
@@ -38,13 +37,6 @@ class EDLViewModel : ViewModel() {
     val state: State<InventoryState>
         get() = _state
 
-    /*
-    var progress: Float = 0.5f
-    var roomName: String = "Couloir, Commencer état des lieux"
-    var wallImages: List<Int> = listOf(R.drawable.house_boone)
-    var emojis: List<String> = listOf("😡", "😞", "😐",  "🙂", "😄", "🤩")
-    var selectedEmoji: String? = null
-    */
     private var imageCapture: ImageCapture? = null
 
     fun setProgress(progress: Float) {
