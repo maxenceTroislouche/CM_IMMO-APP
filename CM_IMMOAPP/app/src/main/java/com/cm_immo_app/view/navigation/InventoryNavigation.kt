@@ -7,13 +7,12 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.cm_immo_app.state.InventoryState
-import com.cm_immo_app.state.LoginState
 import com.cm_immo_app.view.page.InventoryPage
-import com.cm_immo_app.viewmodel.EDLViewModel
+import com.cm_immo_app.viewmodel.InventoryViewmodel
 import kotlin.system.exitProcess
 
 fun NavGraphBuilder.InventoryNavigation() {
-    val edlViewModel = EDLViewModel()
+    val inventoryViewmodel = InventoryViewmodel()
     composable(
         route = "InventoryPage/{token}/{inventoryId}",
         arguments = listOf(
@@ -37,21 +36,21 @@ fun NavGraphBuilder.InventoryNavigation() {
             exitProcess(-1)
         }
 
-        edlViewModel.setToken(token)
-        edlViewModel.setInventoryId(inventoryId)
-        edlViewModel.setProgress(50.0f)
-        edlViewModel.setWallImages(mutableListOf())
-        val state: InventoryState by edlViewModel.state
+        inventoryViewmodel.setToken(token)
+        inventoryViewmodel.setInventoryId(inventoryId)
+        inventoryViewmodel.setProgress(50.0f)
+        inventoryViewmodel.setWallImages(mutableListOf("https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"))
+        val state: InventoryState by inventoryViewmodel.state
         InventoryPage(
             state = state,
-            edlViewModel::setProgress,
-            edlViewModel::setRoomName,
-            edlViewModel::setWallImages,
-            edlViewModel::setSelectedEmoji,
-            edlViewModel::startCamera,
-            edlViewModel::capturePhoto,
-            edlViewModel::encodeFileToBase64,
-            edlViewModel::updateMinute,
+            inventoryViewmodel::setProgress,
+            inventoryViewmodel::setRoomName,
+            inventoryViewmodel::setWallImages,
+            inventoryViewmodel::setSelectedEmoji,
+            inventoryViewmodel::startCamera,
+            inventoryViewmodel::capturePhoto,
+            inventoryViewmodel::encodeFileToBase64,
+            inventoryViewmodel::updateMinute,
         )
     }
 }

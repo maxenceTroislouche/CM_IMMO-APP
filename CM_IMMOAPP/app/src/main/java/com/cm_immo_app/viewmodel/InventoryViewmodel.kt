@@ -32,7 +32,7 @@ import java.util.Locale
 import kotlin.system.exitProcess
 
 
-class EDLViewModel : ViewModel() {
+class InventoryViewmodel : ViewModel() {
     private val _state: MutableState<InventoryState> = mutableStateOf(InventoryState())
     val state: State<InventoryState>
         get() = _state
