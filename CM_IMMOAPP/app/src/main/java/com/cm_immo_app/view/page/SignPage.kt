@@ -1,6 +1,9 @@
 package com.cm_immo_app.view.page
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -11,74 +14,99 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PaintingStyle
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.cm_immo_app.viewmodel.SignatureViewModel
+import androidx.core.graphics.applyCanvas
+import com.cm_immo_app.state.SignState
+
+/**
+ * Code original:
+ * https://www.youtube.com/watch?v=xdebBD47wTY
+ */
+
+data class Line(
+    val start: Offset,
+    val end: Offset,
+    val color: Color = Color.Black,
+    val strokeWidth: Dp = 1.dp
+)
 
 @Composable
-fun SignaturePad(viewModel: SignatureViewModel) {
+fun SignaturePad(
+    state: SignState,
+    saveSignature: (bitmap: Bitmap, context: Context, onSaved: (Uri) -> Unit) -> Unit,
+) {
     val context = LocalContext.current
-    var points by remember { mutableStateOf(mutableListOf<Offset>()) }
+    val lines = remember {
+        mutableStateListOf<Line>()
+    }
+    val bitmapState = remember { mutableStateOf<Bitmap?>(null) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .pointerInput(Unit) {
-                detectDragGestures(
-                    onDragStart = { offset ->
-                        points.add(offset)
-                    },
-                    onDrag = { change, _ ->
-                        points.add(change.position)
-                        change.consume()
-                    }
-                )
-            }
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val paint = androidx.compose.ui.graphics.Paint().apply {
-                color = Color.Black
-                strokeWidth = 4f
-                style = PaintingStyle.Stroke
+        Canvas(modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(true) {
+                detectDragGestures { change, dragAmount ->
+                    change.consume()
+
+                    val line = Line(
+                        start = change.position - dragAmount,
+                        end = change.position
+                    )
+
+                    lines.add(line)
+                }
             }
-            for (i in 0 until points.size - 1) {
+        ) {
+            lines.forEach { line ->
                 drawLine(
-                    color = paint.color,
-                    start = points[i],
-                    end = points[i + 1],
-                    strokeWidth = paint.strokeWidth
+                    color = line.color,
+                    start = line.start,
+                    end = line.end,
+                    strokeWidth = line.strokeWidth.toPx(),
+                    cap = StrokeCap.Round
                 )
             }
+            // Capture the canvas to a bitmap
+            val bitmap = drawContext.canvas.nativeCanvas.let { canvas ->
+                Bitmap.createBitmap(
+                    canvas.width,
+                    canvas.height,
+                    Bitmap.Config.ARGB_8888
+                ).applyCanvas {
+                    drawColor(android.graphics.Color.WHITE)
+                    lines.forEach { line ->
+                        val paint = android.graphics.Paint().apply {
+                            color = android.graphics.Color.BLACK
+                            strokeWidth = line.strokeWidth.toPx()
+                            style = android.graphics.Paint.Style.STROKE
+                        }
+                        drawLine(
+                            line.start.x, line.start.y,
+                            line.end.x, line.end.y, paint
+                        )
+                    }
+                }
+            }
+            bitmapState.value = bitmap.asImageBitmap().asAndroidBitmap()
         }
         Button(
             onClick = {
-                val bitmap = Bitmap.createBitmap(
-                    context.resources.displayMetrics.widthPixels,
-                    context.resources.displayMetrics.heightPixels,
-                    Bitmap.Config.ARGB_8888
-                )
-                val androidCanvas = android.graphics.Canvas(bitmap)
-                androidCanvas.drawColor(android.graphics.Color.WHITE) // Ensure the background is white
-                val paint = android.graphics.Paint().apply {
-                    color = android.graphics.Color.BLACK
-                    strokeWidth = 4f
-                    style = android.graphics.Paint.Style.STROKE
-                }
-                for (i in 0 until points.size - 1) {
-                    androidCanvas.drawLine(
-                        points[i].x,
-                        points[i].y,
-                        points[i + 1].x,
-                        points[i + 1].y,
-                        paint
-                    )
-                }
-                viewModel.saveSignature(bitmap, context) { uri ->
-                    // Handle the saved signature URI here if needed
+                bitmapState.value?.let { bitmap ->
+                    saveSignature(bitmap, context) { uri ->
+                        // Gérer l'URI de la signature enregistrée ici si nécessaire
+                        Log.i("SignPage", "image canvas sauvegardée: $uri")
+                    }
                 }
             },
             modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
@@ -90,9 +118,10 @@ fun SignaturePad(viewModel: SignatureViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignaturePage() {
-    val viewModel: SignatureViewModel = viewModel()
-
+fun SignaturePage(
+    state: SignState,
+    saveSignature: (bitmap: Bitmap, context: Context, onSaved: (Uri) -> Unit) -> Unit,
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -105,7 +134,10 @@ fun SignaturePage() {
                 .fillMaxSize()
                 .background(Color(0xFFF5F4F8))
             ) {
-                SignaturePad(viewModel)
+                SignaturePad(
+                    state,
+                    saveSignature,
+                )
             }
         }
     )

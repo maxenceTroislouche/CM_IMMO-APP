@@ -13,6 +13,7 @@ const val LoginRoute = "login"
 
 fun NavGraphBuilder.LoginNavigation(
     navigateToPropertiesList: (token: String) -> Unit,
+    navigateToSignPage: (token: String, type: String, inventoryId: Int, personId: Int) -> Unit,
 ) {
     val loginViewModel = LoginViewModel()
     composable(LoginRoute) {
@@ -24,5 +25,7 @@ fun NavGraphBuilder.LoginNavigation(
             connect = loginViewModel::connect,
             navigateToPropertiesList = navigateToPropertiesList,
         )
+        // TODO: test chlag pour tester les signatures
+        // navigateToSignPage("test", "test", 1, 1)
     }
 }

@@ -9,6 +9,12 @@ object RetrofitHelper {
         .baseUrl("https://api.taffin.ovh")
         .build()
 
+    /*
+    private val retrofitClient: Retrofit = Retrofit.Builder()
+        .addConverterFactory(GsonConverterFactory.create())
+        .baseUrl("http://localhost:3000")
+        .build()
+    */
     val authService: AuthService = retrofitClient.create(AuthService::class.java)
     val propertyService: PropertyService = retrofitClient.create(PropertyService::class.java)
     val inventoryService: InventoryService = retrofitClient.create(InventoryService::class.java)

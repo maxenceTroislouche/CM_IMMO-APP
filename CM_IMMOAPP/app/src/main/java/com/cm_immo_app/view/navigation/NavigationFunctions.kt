@@ -16,3 +16,13 @@ fun NavController.navigateToInventoryPage(token: String, inventoryId: Int) {
     Log.i("NavigateToInventoryPage", "token: $token / inventoryId: $inventoryId")
     navigate(route = "InventoryPage/$token/$inventoryId")
 }
+
+fun NavController.navigateToSignPage(
+    token: String,
+    type: String,
+    inventoryId: Int,
+    personId: Int,
+) {
+    Log.i("NavigateToSignaturePage", "token: $token / type: $type / inventoryId: $inventoryId / personId: $personId")
+    navigate(route = "SignPage/$token/$type/$inventoryId/$personId")
+}

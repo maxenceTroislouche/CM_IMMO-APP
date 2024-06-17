@@ -18,6 +18,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.cm_immo_app.view.navigation.SignNavigation
+import com.cm_immo_app.view.navigation.navigateToSignPage
 
 class MainActivity : ComponentActivity() {
     private val CAMERA_PERMISSION_REQUEST_CODE = 101
@@ -36,8 +38,14 @@ class MainActivity : ComponentActivity() {
                 ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
             val navController = rememberNavController()
+
+            val token: String = "test"
+            val type: String = "test"
+            val inventoryId: Int = 1
+            val personId: Int = 1
+
             NavHost(navController, startDestination = "login") {
-                LoginNavigation(navController::navigateToPropertiesList)
+                LoginNavigation(navController::navigateToPropertiesList, navController::navigateToSignPage)
                 PropertiesListNavigation(navController::navigateToPropertiesPage)
                 PropertyNavigation(
                     navigateToInventoryPage = { token, inventoryId ->
@@ -46,6 +54,7 @@ class MainActivity : ComponentActivity() {
                     navigateBack = { navController.popBackStack() }
                 )
                 InventoryNavigation()
+                SignNavigation()
             }
         }
     }
