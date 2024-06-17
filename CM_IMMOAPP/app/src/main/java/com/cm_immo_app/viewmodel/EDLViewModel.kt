@@ -12,6 +12,9 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
@@ -33,7 +36,7 @@ class EDLViewModel : ViewModel() {
     var roomName: String = "Couloir, Commencer état des lieux"
     var wallImages: List<Int> = listOf(R.drawable.house_boone)
     var emojis: List<String> = listOf("🙂", "😐", "😞", "😡", "😄", "🤩")
-    var selectedEmoji: String? = null
+    var selectedEmoji by mutableStateOf<String?>(null)
 
     private var imageCapture: ImageCapture? = null
 

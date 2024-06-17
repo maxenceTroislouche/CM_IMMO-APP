@@ -46,6 +46,7 @@ import com.cm_immo_app.viewmodel.EDLViewModel
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.unit.sp
 
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -144,14 +145,35 @@ fun EmojiFeedback(viewModel: EDLViewModel) {
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         viewModel.emojis.forEach { emoji ->
-            Text(
-                text = emoji,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.clickable {
-                    viewModel.onEmojiSelected(emoji)
-                }
-            )
+            val isSelected = emoji == viewModel.selectedEmoji
+            Box(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(if (isSelected) Color.LightGray else Color.Transparent)
+                    .clickable {
+                        viewModel.onEmojiSelected(emoji)
+                    }
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = emoji,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontSize = if (isSelected) 24.sp else 16.sp
+                    )
+                )
+            }
         }
+    }
+}
+
+@Composable
+fun EmojiFeedbackSection(viewModel: EDLViewModel) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        EmojiFeedback(viewModel)
     }
 }
 
@@ -228,13 +250,12 @@ fun ConditionCard(viewModel: EDLViewModel, title: String, images: List<Int>, mod
             }
 
             Spacer(modifier = Modifier.height(25.dp))
-            EmojiFeedback(viewModel)
+            EmojiFeedbackSection(viewModel)
             Spacer(modifier = Modifier.height(25.dp))
             NoteSection(viewModel)
         }
     }
 }
-
 
 @Composable
 fun CaptureButton(onCaptureClick: () -> Unit) {
