@@ -14,7 +14,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.with
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -43,11 +42,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import com.cm_immo_app.R
-import com.cm_immo_app.viewmodel.EDLViewModel
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import androidx.compose.ui.graphics.Brush
 import androidx.lifecycle.LifecycleOwner
+import coil.compose.AsyncImage
 import com.cm_immo_app.state.InventoryState
 import com.cm_immo_app.utils.http.MinuteUpdate
 
@@ -57,8 +56,10 @@ import com.cm_immo_app.utils.http.MinuteUpdate
 fun ConditionCards(
     cardIndex: Int,
     titles: List<String>,
-    imagesList: List<List<Int>>,
-    viewModel: EDLViewModel,
+    imagesList: List<List<String>>,
+    state: InventoryState,
+    startCamera: (context: Context, lifecycleOwner: LifecycleOwner, previewView: PreviewView) -> Unit,
+    setSelectedEmoji: (selectedEmoji: String) -> Unit,
     onCardSwiped: (Int) -> Unit
 ) {
     val cardWidth = 600.dp
@@ -118,7 +119,9 @@ fun ConditionCards(
             if (targetCardIndex < titles.size) {
                 val imageList = imagesList[targetCardIndex]
                 ConditionCard(
-                    viewModel,
+                    state,
+                    startCamera,
+                    setSelectedEmoji,
                     titles[targetCardIndex],
                     imageList,
                     Modifier.offset { IntOffset(animatedOffset.roundToInt(), 0) }
@@ -129,11 +132,11 @@ fun ConditionCards(
 }
 
 @Composable
-fun ImageFullScreenDialog(imageId: Int, onDismiss: () -> Unit) {
+fun ImageFullScreenDialog(imageString: String, onDismiss: () -> Unit) {
     Dialog(onDismissRequest = { onDismiss() }) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Image(
-                painter = painterResource(id = imageId),
+            AsyncImage(
+                model = imageString,
                 contentDescription = "Full-screen image",
                 modifier = Modifier
                     .fillMaxSize()
@@ -144,17 +147,17 @@ fun ImageFullScreenDialog(imageId: Int, onDismiss: () -> Unit) {
 }
 
 @Composable
-fun EmojiFeedback(viewModel: EDLViewModel) {
+fun EmojiFeedback(state: InventoryState, setSelectedEmoji: (selectedEmoji: String) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        viewModel.emojis.forEach { emoji ->
+        state.emojis.forEach { emoji ->
             Text(
                 text = emoji,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.clickable {
-                    viewModel.onEmojiSelected(emoji)
+                    setSelectedEmoji(emoji)
                 }
             )
         }
@@ -163,7 +166,7 @@ fun EmojiFeedback(viewModel: EDLViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NoteSection(viewModel: EDLViewModel) {
+fun NoteSection(state: InventoryState) {
     var text by remember { mutableStateOf("") }
     TextField(
         value = text,
@@ -181,10 +184,17 @@ fun NoteSection(viewModel: EDLViewModel) {
 }
 
 @Composable
-fun ConditionCard(viewModel: EDLViewModel, title: String, images: List<Int>, modifier: Modifier = Modifier) {
+fun ConditionCard(
+    state: InventoryState,
+    startCamera: (context: Context, lifecycleOwner: LifecycleOwner, previewView: PreviewView) -> Unit,
+    setSelectedEmoji: (selectedEmoji: String) -> Unit,
+    title: String,
+    images: List<String>,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
-    var selectedImage by remember { mutableStateOf<Int?>(null) }
+    var selectedImage by remember { mutableStateOf<String?>(null) }
     val lifecycleOwner = LocalLifecycleOwner.current
 
     Card(
@@ -213,15 +223,15 @@ fun ConditionCard(viewModel: EDLViewModel, title: String, images: List<Int>, mod
                     factory = { previewView },
                     modifier = Modifier.fillMaxSize()
                 ) { view ->
-                    viewModel.startCamera(context, lifecycleOwner, view)
+                    startCamera(context, lifecycleOwner, view)
                 }
                 Column(modifier = Modifier
                     .verticalScroll(rememberScrollState())
                     .align(Alignment.TopStart)
                     .padding(8.dp)) {
                     images.forEach { image ->
-                        Image(
-                            painter = painterResource(id = image),
+                        AsyncImage(
+                            model = image,
                             contentDescription = "Thumbnail",
                             modifier = Modifier
                                 .size(100.dp)
@@ -234,14 +244,14 @@ fun ConditionCard(viewModel: EDLViewModel, title: String, images: List<Int>, mod
                     }
                 }
                 if (showDialog && selectedImage != null) {
-                    ImageFullScreenDialog(imageId = selectedImage!!, onDismiss = { showDialog = false })
+                    ImageFullScreenDialog(imageString = selectedImage!!, onDismiss = { showDialog = false })
                 }
             }
 
             Spacer(modifier = Modifier.height(25.dp))
-            EmojiFeedback(viewModel)
+            EmojiFeedback(state, setSelectedEmoji)
             Spacer(modifier = Modifier.height(25.dp))
-            NoteSection(viewModel)
+            NoteSection(state)
         }
     }
 }
@@ -327,7 +337,14 @@ fun InventoryPage(
                     .padding(start = 16.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
-            ConditionCards(cardIndex, titles, images, capturePhoto) { newIndex ->
+            ConditionCards(
+                cardIndex,
+                titles,
+                images,
+                state,
+                startCamera,
+                setSelectedEmoji,
+            ) { newIndex ->
                 cardIndex = newIndex % titles.size
             }
         }
