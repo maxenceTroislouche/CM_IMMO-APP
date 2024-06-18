@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.animateDpAsState
@@ -47,6 +48,7 @@ import kotlin.math.roundToInt
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LifecycleOwner
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.cm_immo_app.state.InventoryState
 import com.cm_immo_app.utils.http.MinuteUpdate
@@ -311,6 +313,61 @@ fun ConditionCards(
 }
 
 @Composable
+fun SideMenu(
+    isVisible: Boolean,
+    onDismiss: () -> Unit,
+    navController: NavController
+) {
+    AnimatedVisibility(
+        visible = isVisible,
+        enter = fadeIn(animationSpec = tween(300)),
+        exit = fadeOut(animationSpec = tween(300))
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f))
+                .clickable(onClick = onDismiss)
+        ) {
+            Column(
+                modifier = Modifier
+                    .width(300.dp)
+                    .fillMaxHeight()
+                    .background(Color.White, shape = RoundedCornerShape(0.dp, 16.dp, 16.dp, 0.dp))
+                    .padding(16.dp)
+                    .align(Alignment.CenterStart)
+            ) {
+                Text("Résumé", style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(16.dp))
+                listOf("Couloir", "Cuisine", "Salle de bain", "Chambre 1", "Chambre 2", "Chambre 3").forEach { room ->
+                    Text(
+                        text = room,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
+                            .padding(16.dp)
+                            .clickable {
+                                onDismiss()
+                            }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Button(
+                    onClick = {
+                        onDismiss()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Text("Retour Menu")
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun InventoryPage(
     state: InventoryState,
     setProgress: (progress: Float) -> Unit,
@@ -328,12 +385,9 @@ fun InventoryPage(
     val images = listOf(state.wallImages, state.wallImages)
     val context = LocalContext.current
 
-    // Dégradé de fond
-    val gradient = Brush.verticalGradient(
-        colors = listOf(Color.Transparent, Color(0xFF8BC83F)),
-        startY = 0f,
-        endY = 1000f
-    )
+    // State for menu visibility
+    var isMenuVisible by remember { mutableStateOf(false) }
+    val selectedRoom = "Couloir" // Change this based on the actual selected room
 
     Box(
         modifier = Modifier
@@ -386,7 +440,11 @@ fun InventoryPage(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .background(gradient)
+                    .background(Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, Color(0xFF8BC83F)),
+                        startY = 0f,
+                        endY = 1000f
+                    ))
                     .align(Alignment.BottomCenter)
             )
             Box(
@@ -402,5 +460,83 @@ fun InventoryPage(
                 })
             }
         }
+        // Menu icon
+        Icon(
+            painter = painterResource(id = R.drawable.ic_menu),
+            contentDescription = "Menu",
+            modifier = Modifier
+                .size(48.dp)
+                .padding(16.dp)
+                .clickable { isMenuVisible = true }
+                .align(Alignment.TopStart)
+        )
+
+        // Slide-out menu
+        AnimatedVisibility(
+            visible = isMenuVisible,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f))
+            ) {
+                Column(
+                    modifier = Modifier
+                        .width(300.dp)
+                        .fillMaxHeight()
+                        .background(Color.White)
+                        .padding(16.dp)
+                        .align(Alignment.CenterStart)
+                ) {
+                    // Arrow to hide menu
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_arrow_back),
+                        contentDescription = "Back",
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clickable { isMenuVisible = false }
+                            .align(Alignment.Start)
+                    )
+                    Text(
+                        text = "Résumé",
+                        style = MaterialTheme.typography.headlineMedium,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    MenuItem("Couloir", selectedRoom)
+                    MenuItem("Cuisine", selectedRoom)
+                    MenuItem("Salle de bain", selectedRoom)
+                    MenuItem("Chambres 1", selectedRoom)
+                    MenuItem("Chambres 2", selectedRoom)
+                    MenuItem("Chambres 3", selectedRoom)
+                    Spacer(modifier = Modifier.weight(1f))
+                    Button(
+                        onClick = { /* Handle exit inventory and return to detail page */ },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC8473F)),
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) {
+                        Text("Retour Menu")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MenuItem(roomName: String, selectedRoom: String) {
+    val isSelected = roomName == selectedRoom
+    Button(
+        onClick = { /* Handle room navigation */ },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isSelected) Color(0xFF8BC83F) else Color(0xFF234F68),
+            contentColor = Color.White
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ) {
+        Text(roomName)
     }
 }
