@@ -11,11 +11,14 @@ import com.cm_immo_app.view.page.SignaturePage
 import com.cm_immo_app.viewmodel.SignViewModel
 import kotlin.system.exitProcess
 
-fun NavGraphBuilder.SignNavigation() {
+fun NavGraphBuilder.SignNavigation(
+    navigateToSignPage: (token: String, type: String, inventoryId: Int) -> Unit,
+    navigateToPropertiesListPage: (token: String) -> Unit,
+) {
     val signViewModel = SignViewModel()
 
     composable(
-        route = "SignPage/{token}/{type}/{inventoryId}/{personId}",
+        route = "SignPage/{token}/{type}/{inventoryId}",
         arguments = listOf(
             navArgument(name = "token") {
                 type = NavType.StringType
@@ -26,18 +29,14 @@ fun NavGraphBuilder.SignNavigation() {
             navArgument(name = "inventoryId") {
                 type = NavType.IntType
             },
-            navArgument(name = "personId") {
-                type = NavType.IntType
-            }
         )
     ) { backstackEntry ->
         val token = backstackEntry.arguments?.getString("token")
         val type = backstackEntry.arguments?.getString("type")
         val inventoryId = backstackEntry.arguments?.getInt("inventoryId")
-        val personId = backstackEntry.arguments?.getInt("personId")
 
-        if (token == null || type == null || inventoryId == null || personId == null) {
-            Log.e("SignNavigation", "Un des paramètres n'a pas été saisi: {token: $token} / {type: $type} / {inventoryId: $inventoryId} / {personId: $personId}")
+        if (token == null || type == null || inventoryId == null) {
+            Log.e("SignNavigation", "Un des paramètres n'a pas été saisi: {token: $token} / {type: $type} / {inventoryId: $inventoryId}")
             Log.i("SignNavigation", "${backstackEntry.arguments}")
             exitProcess(-1)
         }
@@ -50,13 +49,14 @@ fun NavGraphBuilder.SignNavigation() {
         signViewModel.setToken(token)
         signViewModel.setType(type)
         signViewModel.setInventoryId(inventoryId)
-        signViewModel.setPersonId(personId)
 
         val state: SignState by signViewModel.state
 
         SignaturePage(
             state,
             signViewModel::saveSignature,
+            navigateToSignPage,
+            navigateToPropertiesListPage,
         )
     }
 }

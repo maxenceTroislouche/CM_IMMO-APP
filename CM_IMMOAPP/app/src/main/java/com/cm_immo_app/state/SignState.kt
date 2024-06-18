@@ -4,5 +4,4 @@ data class SignState (
     val token: String = "",
     val type: String = "",
     val inventoryId: Int = -1,
-    val personId: Int = -1,
 )

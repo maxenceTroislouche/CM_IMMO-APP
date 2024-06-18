@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.View
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.animateDpAsState
@@ -46,18 +45,94 @@ import com.cm_immo_app.R
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LifecycleOwner
-import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.cm_immo_app.state.InventoryState
 import com.cm_immo_app.utils.http.MinuteUpdate
 
+
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun ImageFullScreenDialog(
-    imageString: String,
-    onDismiss: () -> Unit
+fun ConditionCards(
+    cardIndex: Int,
+    titles: List<String>,
+    imagesList: List<List<String>>,
+    state: InventoryState,
+    startCamera: (context: Context, lifecycleOwner: LifecycleOwner, previewView: PreviewView) -> Unit,
+    setSelectedEmoji: (selectedEmoji: String) -> Unit,
+    onCardSwiped: (Int) -> Unit
 ) {
+    val cardWidth = 600.dp
+    var offsetX by remember { mutableStateOf(0f) }
+    val dismissDirection = remember { mutableStateOf(0) }
+    val density = LocalDensity.current.density
+
+    LaunchedEffect(dismissDirection.value) {
+        when (dismissDirection.value) {
+            1 -> {
+                delay(300)
+                onCardSwiped((cardIndex + 1) % titles.size)
+                dismissDirection.value = 0
+            }
+            -1 -> {
+                delay(300)
+                onCardSwiped((cardIndex - 1 + titles.size) % titles.size)
+                dismissDirection.value = 0
+            }
+        }
+    }
+
+    val animatedOffset by animateFloatAsState(targetValue = offsetX, animationSpec = tween(300))
+    val animatedWidth by animateDpAsState(targetValue = if (offsetX == 0f) cardWidth else cardWidth - 50.dp)
+
+    Box(
+        modifier = Modifier
+            .width(animatedWidth)
+            .padding(16.dp)
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(onDragEnd = {
+                    offsetX = 0f
+                }) { change, dragAmount ->
+                    offsetX += (dragAmount / density)
+                    if (offsetX > 300f) dismissDirection.value = 1
+                    if (offsetX < -300f) dismissDirection.value = -1
+                    if (change.positionChange() != Offset.Zero) change.consume()
+                }
+            }
+            .graphicsLayer(
+                alpha = 1f,
+                rotationZ = animatedOffset / 50
+            )
+    ) {
+        AnimatedContent(
+            targetState = cardIndex,
+            transitionSpec = {
+                if (targetState > initialState) {
+                    slideInHorizontally { width -> width } + fadeIn() with
+                            slideOutHorizontally { width -> -width } + fadeOut()
+                } else {
+                    slideInHorizontally { width -> -width } + fadeIn() with
+                            slideOutHorizontally { width -> width } + fadeOut()
+                }.using(SizeTransform(clip = false))
+            }
+        ) { targetCardIndex ->
+            if (targetCardIndex < titles.size) {
+                val imageList = imagesList[targetCardIndex]
+                ConditionCard(
+                    state,
+                    startCamera,
+                    setSelectedEmoji,
+                    titles[targetCardIndex],
+                    imageList,
+                    Modifier.offset { IntOffset(animatedOffset.roundToInt(), 0) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ImageFullScreenDialog(imageString: String, onDismiss: () -> Unit) {
     Dialog(onDismissRequest = { onDismiss() }) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             AsyncImage(
@@ -72,47 +147,20 @@ fun ImageFullScreenDialog(
 }
 
 @Composable
-fun EmojiFeedback(
-    state: InventoryState,
-    setSelectedEmoji: (selectedEmoji: String) -> Unit
-) {
+fun EmojiFeedback(state: InventoryState, setSelectedEmoji: (selectedEmoji: String) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         state.emojis.forEach { emoji ->
-            val isSelected = emoji == state.selectedEmoji
-            Box(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(if (isSelected) Color.LightGray else Color.Transparent)
-                    .clickable {
-                        setSelectedEmoji(emoji)
-                    }
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Text(
-                    text = emoji,
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontSize = if (isSelected) 24.sp else 16.sp
-                    )
-                )
-            }
+            Text(
+                text = emoji,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.clickable {
+                    setSelectedEmoji(emoji)
+                }
+            )
         }
-    }
-}
-
-@Composable
-fun EmojiFeedbackSection(
-    state: InventoryState,
-    setSelectedEmoji: (selectedEmoji: String) -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        EmojiFeedback(state, setSelectedEmoji)
     }
 }
 
@@ -201,12 +249,13 @@ fun ConditionCard(
             }
 
             Spacer(modifier = Modifier.height(25.dp))
-            EmojiFeedbackSection(state, setSelectedEmoji)
+            EmojiFeedback(state, setSelectedEmoji)
             Spacer(modifier = Modifier.height(25.dp))
             NoteSection(state)
         }
     }
 }
+
 
 @Composable
 fun CaptureButton(onCaptureClick: () -> Unit) {
@@ -232,141 +281,6 @@ fun CaptureButton(onCaptureClick: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-fun ConditionCards(
-    cardIndex: Int,
-    titles: List<String>,
-    imagesList: List<List<String>>,
-    state: InventoryState,
-    startCamera: (context: Context, lifecycleOwner: LifecycleOwner, previewView: PreviewView) -> Unit,
-    setSelectedEmoji: (selectedEmoji: String) -> Unit,
-    onCardSwiped: (Int) -> Unit
-) {
-    val cardWidth = 600.dp
-    var offsetX by remember { mutableStateOf(0f) }
-    val dismissDirection = remember { mutableStateOf(0) }
-    val density = LocalDensity.current.density
-
-    LaunchedEffect(dismissDirection.value) {
-        when (dismissDirection.value) {
-            1 -> {
-                delay(300)
-                onCardSwiped((cardIndex + 1) % titles.size)
-                dismissDirection.value = 0
-            }
-            -1 -> {
-                delay(300)
-                onCardSwiped((cardIndex - 1 + titles.size) % titles.size)
-                dismissDirection.value = 0
-            }
-        }
-    }
-
-    val animatedOffset by animateFloatAsState(targetValue = offsetX, animationSpec = tween(300))
-    val animatedWidth by animateDpAsState(targetValue = if (offsetX == 0f) cardWidth else cardWidth - 50.dp)
-
-    Box(
-        modifier = Modifier
-            .width(animatedWidth)
-            .padding(16.dp)
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures(onDragEnd = {
-                    offsetX = 0f
-                }) { change, dragAmount ->
-                    offsetX += (dragAmount / density)
-                    if (offsetX > 300f) dismissDirection.value = 1
-                    if (offsetX < -300f) dismissDirection.value = -1
-                    if (change.positionChange() != Offset.Zero) change.consume()
-                }
-            }
-            .graphicsLayer(
-                alpha = 1f,
-                rotationZ = animatedOffset / 50
-            )
-    ) {
-        AnimatedContent(
-            targetState = cardIndex,
-            transitionSpec = {
-                if (targetState > initialState) {
-                    slideInHorizontally { width -> width } + fadeIn() with
-                            slideOutHorizontally { width -> -width } + fadeOut()
-                } else {
-                    slideInHorizontally { width -> -width } + fadeIn() with
-                            slideOutHorizontally { width -> width } + fadeOut()
-                }.using(SizeTransform(clip = false))
-            }
-        ) { targetCardIndex ->
-            if (targetCardIndex < titles.size) {
-                val imageList = imagesList[targetCardIndex]
-                ConditionCard(
-                    state,
-                    startCamera,
-                    setSelectedEmoji,
-                    titles[targetCardIndex],
-                    imageList,
-                    Modifier.offset { IntOffset(animatedOffset.roundToInt(), 0) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun SideMenu(
-    isVisible: Boolean,
-    onDismiss: () -> Unit,
-    navController: NavController
-) {
-    AnimatedVisibility(
-        visible = isVisible,
-        enter = fadeIn(animationSpec = tween(300)),
-        exit = fadeOut(animationSpec = tween(300))
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f))
-                .clickable(onClick = onDismiss)
-        ) {
-            Column(
-                modifier = Modifier
-                    .width(300.dp)
-                    .fillMaxHeight()
-                    .background(Color.White, shape = RoundedCornerShape(0.dp, 16.dp, 16.dp, 0.dp))
-                    .padding(16.dp)
-                    .align(Alignment.CenterStart)
-            ) {
-                Text("Résumé", style = MaterialTheme.typography.titleLarge)
-                Spacer(modifier = Modifier.height(16.dp))
-                listOf("Couloir", "Cuisine", "Salle de bain", "Chambre 1", "Chambre 2", "Chambre 3").forEach { room ->
-                    Text(
-                        text = room,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
-                            .padding(16.dp)
-                            .clickable {
-                                onDismiss()
-                            }
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                Button(
-                    onClick = {
-                        onDismiss()
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                ) {
-                    Text("Retour Menu")
-                }
-            }
-        }
-    }
-}
-
 @Composable
 fun InventoryPage(
     state: InventoryState,
@@ -385,9 +299,12 @@ fun InventoryPage(
     val images = listOf(state.wallImages, state.wallImages)
     val context = LocalContext.current
 
-    // State for menu visibility
-    var isMenuVisible by remember { mutableStateOf(false) }
-    val selectedRoom = "Couloir" // Change this based on the actual selected room
+    // Dégradé de fond
+    val gradient = Brush.verticalGradient(
+        colors = listOf(Color.Transparent, Color(0xFF8BC83F)),
+        startY = 0f,
+        endY = 1000f
+    )
 
     Box(
         modifier = Modifier
@@ -440,11 +357,7 @@ fun InventoryPage(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .background(Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color(0xFF8BC83F)),
-                        startY = 0f,
-                        endY = 1000f
-                    ))
+                    .background(gradient)
                     .align(Alignment.BottomCenter)
             )
             Box(
@@ -455,88 +368,14 @@ fun InventoryPage(
             ) {
                 CaptureButton(onCaptureClick = {
                     capturePhoto(context) { uri ->
-                        // Handle the captured photo URI here if needed
+
+                        // Envoyer la photo de la signature avec les infos correspondantes
+
+                        // Rediriger vers la page de signature suivante OU liste des biens
+
                     }
                 })
             }
         }
-        // Menu icon
-        Icon(
-            painter = painterResource(id = R.drawable.ic_menu),
-            contentDescription = "Menu",
-            modifier = Modifier
-                .size(48.dp)
-                .padding(16.dp)
-                .clickable { isMenuVisible = true }
-                .align(Alignment.TopStart)
-        )
-
-        // Slide-out menu
-        AnimatedVisibility(
-            visible = isMenuVisible,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f))
-            ) {
-                Column(
-                    modifier = Modifier
-                        .width(300.dp)
-                        .fillMaxHeight()
-                        .background(Color.White)
-                        .padding(16.dp)
-                        .align(Alignment.CenterStart)
-                ) {
-                    // Arrow to hide menu
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_arrow_back),
-                        contentDescription = "Back",
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clickable { isMenuVisible = false }
-                            .align(Alignment.Start)
-                    )
-                    Text(
-                        text = "Résumé",
-                        style = MaterialTheme.typography.headlineMedium,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    MenuItem("Couloir", selectedRoom)
-                    MenuItem("Cuisine", selectedRoom)
-                    MenuItem("Salle de bain", selectedRoom)
-                    MenuItem("Chambres 1", selectedRoom)
-                    MenuItem("Chambres 2", selectedRoom)
-                    MenuItem("Chambres 3", selectedRoom)
-                    Spacer(modifier = Modifier.weight(1f))
-                    Button(
-                        onClick = { /* Handle exit inventory and return to detail page */ },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC8473F)),
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    ) {
-                        Text("Retour Menu")
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun MenuItem(roomName: String, selectedRoom: String) {
-    val isSelected = roomName == selectedRoom
-    Button(
-        onClick = { /* Handle room navigation */ },
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (isSelected) Color(0xFF8BC83F) else Color(0xFF234F68),
-            contentColor = Color.White
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    ) {
-        Text(roomName)
     }
 }

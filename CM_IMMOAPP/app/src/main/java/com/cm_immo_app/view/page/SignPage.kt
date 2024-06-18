@@ -42,6 +42,8 @@ data class Line(
 fun SignaturePad(
     state: SignState,
     saveSignature: (bitmap: Bitmap, context: Context, onSaved: (Uri) -> Unit) -> Unit,
+    navigateToSignPage: (token: String, type: String, inventoryId: Int) -> Unit,
+    navigateToPropertiesListPage: (token: String) -> Unit,
 ) {
     val context = LocalContext.current
     val lines = remember {
@@ -119,6 +121,26 @@ fun SignaturePad(
                         saveSignature(bitmap, context) { uri ->
                             // Gérer l'URI de la signature enregistrée ici si nécessaire
                             Log.i("SignPage", "image canvas sauvegardée: $uri")
+
+
+                            // Envoi de la signature via l'api
+
+                            // Navigation vers la page de signature suivante OU page liste des biens
+                            if (state.type == "LOCATAIRE") {
+                                navigateToSignPage(
+                                    state.token,
+                                    "PROPRIETAIRE",
+                                    state.inventoryId
+                                )
+                            } else if (state.type == "PROPRIETAIRE") {
+                                navigateToSignPage(
+                                    state.token,
+                                    "AGENT",
+                                    state.inventoryId
+                                )
+                            } else {
+                                navigateToPropertiesListPage(state.token)
+                            }
                         }
                     }
                 },
@@ -138,6 +160,8 @@ fun SignaturePad(
 fun SignaturePage(
     state: SignState,
     saveSignature: (bitmap: Bitmap, context: Context, onSaved: (Uri) -> Unit) -> Unit,
+    navigateToSignPage: (token: String, type: String, inventoryId: Int) -> Unit,
+    navigateToPropertiesListPage: (token: String) -> Unit,
 ) {
 
     var title = "Signature du locataire"
@@ -169,6 +193,8 @@ fun SignaturePage(
                 SignaturePad(
                     state,
                     saveSignature,
+                    navigateToSignPage,
+                    navigateToPropertiesListPage,
                 )
             }
         }

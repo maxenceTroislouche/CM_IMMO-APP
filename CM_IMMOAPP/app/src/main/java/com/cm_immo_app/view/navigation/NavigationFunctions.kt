@@ -7,7 +7,7 @@ fun NavController.navigateToPropertiesPage(token: String, propertyId: Int) {
     navigate(route = "PropertyPage/$token/$propertyId")
 }
 
-fun NavController.navigateToPropertiesList(token: String) {
+fun NavController.navigateToPropertiesListPage(token: String) {
     Log.i("Login", "token: $token")
     navigate(route = "PropertiesListPage/$token")
 }
@@ -21,8 +21,7 @@ fun NavController.navigateToSignPage(
     token: String,
     type: String,
     inventoryId: Int,
-    personId: Int,
 ) {
-    Log.i("NavigateToSignaturePage", "token: $token / type: $type / inventoryId: $inventoryId / personId: $personId")
-    navigate(route = "SignPage/$token/$type/$inventoryId/$personId")
+    Log.i("NavigateToSignaturePage", "token: $token / type: $type / inventoryId: $inventoryId")
+    navigate(route = "SignPage/$token/$type/$inventoryId")
 }

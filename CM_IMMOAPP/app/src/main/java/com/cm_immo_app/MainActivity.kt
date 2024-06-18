@@ -12,7 +12,7 @@ import com.cm_immo_app.view.navigation.InventoryNavigation
 import com.cm_immo_app.view.navigation.LoginNavigation
 import com.cm_immo_app.view.navigation.PropertiesListNavigation
 import com.cm_immo_app.view.navigation.PropertyNavigation
-import com.cm_immo_app.view.navigation.navigateToPropertiesList
+import com.cm_immo_app.view.navigation.navigateToPropertiesListPage
 import com.cm_immo_app.view.navigation.navigateToPropertiesPage
 import android.Manifest
 import android.content.pm.PackageManager
@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
 
             NavHost(navController, startDestination = "login") {
-                LoginNavigation(navController::navigateToPropertiesList, navController::navigateToSignPage)
+                LoginNavigation(navController::navigateToPropertiesListPage, navController::navigateToSignPage)
                 PropertiesListNavigation(navController::navigateToPropertiesPage)
                 PropertyNavigation(
                     navigateToInventoryPage = { token, inventoryId ->
@@ -49,7 +49,10 @@ class MainActivity : ComponentActivity() {
                     navigateBack = { navController.popBackStack() }
                 )
                 InventoryNavigation()
-                SignNavigation()
+                SignNavigation(
+                    navController::navigateToSignPage,
+                    navController::navigateToPropertiesListPage,
+                )
             }
         }
     }

@@ -29,10 +29,6 @@ class SignViewModel : ViewModel() {
         _state.value = _state.value.copy(inventoryId = inventoryId)
     }
 
-    fun setPersonId(personId: Int) {
-        _state.value = _state.value.copy(personId = personId)
-    }
-
     fun saveSignature(bitmap: Bitmap, context: Context, onSaved: (Uri) -> Unit) {
         val filename = "signature_${System.currentTimeMillis()}.png"
         val contentValues = ContentValues().apply {
