@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -47,6 +48,12 @@ fun SignaturePad(
         mutableStateListOf<Line>()
     }
     val bitmapState = remember { mutableStateOf<Bitmap?>(null) }
+
+    val gradient = Brush.verticalGradient(
+        colors = listOf(Color.Transparent, Color(0xFF8BC83F)),
+        startY = 0f,
+        endY = 400f
+    )
 
     Box(
         modifier = Modifier
@@ -100,19 +107,29 @@ fun SignaturePad(
             }
             bitmapState.value = bitmap.asImageBitmap().asAndroidBitmap()
         }
-        Button(
-            onClick = {
-                bitmapState.value?.let { bitmap ->
-                    saveSignature(bitmap, context) { uri ->
-                        // Gérer l'URI de la signature enregistrée ici si nécessaire
-                        Log.i("SignPage", "image canvas sauvegardée: $uri")
-                    }
-                }
-            },
-            modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .background(gradient)
         ) {
-            Text("Enregistrer")
+            Button(
+                onClick = {
+                    bitmapState.value?.let { bitmap ->
+                        saveSignature(bitmap, context) { uri ->
+                            // Gérer l'URI de la signature enregistrée ici si nécessaire
+                            Log.i("SignPage", "image canvas sauvegardée: $uri")
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp)
+            ) {
+                Text("Valider la signature")
+            }
         }
+
     }
 }
 
@@ -122,10 +139,25 @@ fun SignaturePage(
     state: SignState,
     saveSignature: (bitmap: Bitmap, context: Context, onSaved: (Uri) -> Unit) -> Unit,
 ) {
+
+    var title = "Signature du locataire"
+    if (state.type == "PROPRIETAIRE") {
+        title = "Signature du propriétaire"
+    } else if (state.type == "AGENT") {
+        title = "Signature de l'agent"
+    }
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Signature") }
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
             )
         },
         content = { padding ->

@@ -39,11 +39,6 @@ class MainActivity : ComponentActivity() {
 
             val navController = rememberNavController()
 
-            val token: String = "test"
-            val type: String = "test"
-            val inventoryId: Int = 1
-            val personId: Int = 1
-
             NavHost(navController, startDestination = "login") {
                 LoginNavigation(navController::navigateToPropertiesList, navController::navigateToSignPage)
                 PropertiesListNavigation(navController::navigateToPropertiesPage)

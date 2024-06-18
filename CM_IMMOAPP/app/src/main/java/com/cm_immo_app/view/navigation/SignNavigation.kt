@@ -42,6 +42,11 @@ fun NavGraphBuilder.SignNavigation() {
             exitProcess(-1)
         }
 
+        if (type != "AGENT" && type != "LOCATAIRE" && type != "PROPRIETAIRE") {
+            Log.e("SignNavigation", "Le paramètre type est incorrect $type")
+            exitProcess(-1)
+        }
+
         signViewModel.setToken(token)
         signViewModel.setType(type)
         signViewModel.setInventoryId(inventoryId)
