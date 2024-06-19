@@ -44,6 +44,7 @@ fun SignaturePad(
     saveSignature: (bitmap: Bitmap, context: Context, onSaved: (String?) -> Unit) -> Unit,
     navigateToSignPage: (token: String, type: String, inventoryId: Int) -> Unit,
     navigateToPropertiesListPage: (token: String) -> Unit,
+    sendSignature: (path: String, type: String) -> Unit,
 ) {
     val context = LocalContext.current
     val lines = remember {
@@ -122,8 +123,12 @@ fun SignaturePad(
                             // Gérer l'URI de la signature enregistrée ici si nécessaire
                             Log.i("SignPage", "image canvas sauvegardée: $uri")
 
-
+                            if (uri == null) {
+                                Log.e("SignPage", "Pas d'uri :(")
+                                return@saveSignature
+                            }
                             // Envoi de la signature via l'api
+                            sendSignature(uri, state.type)
 
                             // Navigation vers la page de signature suivante OU page liste des biens
                             if (state.type == "LOCATAIRE") {
@@ -162,6 +167,7 @@ fun SignaturePage(
     saveSignature: (bitmap: Bitmap, context: Context, onSaved: (String?) -> Unit) -> Unit,
     navigateToSignPage: (token: String, type: String, inventoryId: Int) -> Unit,
     navigateToPropertiesListPage: (token: String) -> Unit,
+    sendSignature: (path: String, type: String) -> Unit,
 ) {
 
     var title = "Signature du locataire"
@@ -195,6 +201,7 @@ fun SignaturePage(
                     saveSignature,
                     navigateToSignPage,
                     navigateToPropertiesListPage,
+                    sendSignature,
                 )
             }
         }

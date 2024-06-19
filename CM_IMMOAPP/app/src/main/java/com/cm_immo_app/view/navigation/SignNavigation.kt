@@ -57,6 +57,7 @@ fun NavGraphBuilder.SignNavigation(
             signViewModel::saveSignature,
             navigateToSignPage,
             navigateToPropertiesListPage,
+            signViewModel::sendSignature,
         )
     }
 }

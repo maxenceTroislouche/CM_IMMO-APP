@@ -26,6 +26,6 @@ fun NavGraphBuilder.LoginNavigation(
             navigateToPropertiesList = navigateToPropertiesList,
         )
         // TODO: test chlag pour tester les signatures
-        navigateToSignPage("test", "LOCATAIRE", 1)
+        navigateToSignPage("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3MTg4MjM5MzAsImV4cCI6MTcxOTQyODczMH0.t4GswOBKwN5DDTLyRmq66yWDyVCYWcYeLKDB0wvGEoU", "LOCATAIRE", 1)
     }
 }
