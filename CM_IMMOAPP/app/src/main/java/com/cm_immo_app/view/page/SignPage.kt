@@ -41,7 +41,7 @@ data class Line(
 @Composable
 fun SignaturePad(
     state: SignState,
-    saveSignature: (bitmap: Bitmap, context: Context, onSaved: (Uri) -> Unit) -> Unit,
+    saveSignature: (bitmap: Bitmap, context: Context, onSaved: (String?) -> Unit) -> Unit,
     navigateToSignPage: (token: String, type: String, inventoryId: Int) -> Unit,
     navigateToPropertiesListPage: (token: String) -> Unit,
 ) {
@@ -159,7 +159,7 @@ fun SignaturePad(
 @Composable
 fun SignaturePage(
     state: SignState,
-    saveSignature: (bitmap: Bitmap, context: Context, onSaved: (Uri) -> Unit) -> Unit,
+    saveSignature: (bitmap: Bitmap, context: Context, onSaved: (String?) -> Unit) -> Unit,
     navigateToSignPage: (token: String, type: String, inventoryId: Int) -> Unit,
     navigateToPropertiesListPage: (token: String) -> Unit,
 ) {

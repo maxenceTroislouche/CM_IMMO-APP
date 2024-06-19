@@ -29,7 +29,18 @@ class SignViewModel : ViewModel() {
         _state.value = _state.value.copy(inventoryId = inventoryId)
     }
 
-    fun saveSignature(bitmap: Bitmap, context: Context, onSaved: (Uri) -> Unit) {
+    private fun getRealPathFromURI(context: Context, uri: Uri): String? {
+        val projection = arrayOf(MediaStore.Images.Media.DATA)
+        val cursor = context.contentResolver.query(uri, projection, null, null, null)
+        return cursor?.use {
+            if (it.moveToFirst()) {
+                val columnIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+                it.getString(columnIndex)
+            } else null
+        }
+    }
+
+    fun saveSignature(bitmap: Bitmap, context: Context, onSaved: (String?) -> Unit) {
         val filename = "signature_${System.currentTimeMillis()}.png"
         val contentValues = ContentValues().apply {
             put(MediaStore.Images.Media.DISPLAY_NAME, filename)
@@ -44,7 +55,8 @@ class SignViewModel : ViewModel() {
                 if (outStream != null) {
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream)
                 }
-                onSaved(uri)
+                val path = getRealPathFromURI(context, uri)
+                onSaved(path)
             }
         }
     }
