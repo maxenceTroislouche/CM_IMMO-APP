@@ -308,7 +308,7 @@ fun InventoryPage(
     encodeFileToBase64: (filePath: String) -> String?,
     updateMinute: (minute: MinuteUpdate) -> Unit,
     navigateBack: () -> Unit,
-    setCurrentRoom: (roomName: String) -> Unit
+    setCurrentRoom: (roomName: String) -> Unit // Add setCurrentRoom function
 ) {
     val scrollState = rememberScrollState()
     var cardIndex by remember { mutableStateOf(0) }
@@ -482,3 +482,4 @@ fun MenuItem(roomName: String, selectedRoom: String, onClick: () -> Unit) {
         Text(roomName)
     }
 }
+

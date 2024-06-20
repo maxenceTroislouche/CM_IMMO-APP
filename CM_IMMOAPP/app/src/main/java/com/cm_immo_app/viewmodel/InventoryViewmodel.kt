@@ -157,6 +157,10 @@ class InventoryViewmodel : ViewModel() {
             if (response.isSuccessful) {
                 response.body()?.let { inventoryData ->
                     updateRooms(inventoryData.rooms)
+                    if (inventoryData.rooms.isNotEmpty() && state.value.roomName.isEmpty()) {
+                        setCurrentRoom(inventoryData.rooms.first().description)
+                        setRoomName(inventoryData.rooms.first().description)
+                    }
                 }
                 Log.i("InventoryViewmodel", "Successfully retrieved inventory data")
             } else {
@@ -164,6 +168,7 @@ class InventoryViewmodel : ViewModel() {
             }
         }
     }
+
     fun setCurrentRoom(roomName: String) {
         _state.value = _state.value.copy(roomName = roomName)
     }

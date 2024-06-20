@@ -57,3 +57,5 @@ fun NavGraphBuilder.InventoryNavigation(navigateBack: () -> Unit) {
         )
     }
 }
+
+
