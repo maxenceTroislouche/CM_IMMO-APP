@@ -143,7 +143,14 @@ class InventoryViewmodel : ViewModel() {
 
     fun updateMinute(minute: MinuteUpdate) {
         viewModelScope.launch(Dispatchers.IO) {
-            Log.i("InventoryViewmodel", "$minute")
+            try {
+                val response = RetrofitHelper.minuteService.updateMinute(
+                    token = "Bearer ${state.value.token}",
+                    minuteToUpdate = minute
+                )
+            } catch (e: Exception) {
+                Log.e("InventoryViewmodel", "Exception while updating minute", e)
+            }
         }
     }
 
@@ -170,6 +177,22 @@ class InventoryViewmodel : ViewModel() {
     }
 
     fun setCurrentRoom(roomName: String) {
+        val currentRoom = _state.value.rooms.find { it.description == _state.value.roomName }
+        currentRoom?.let { room ->
+            room.minutes.forEach { minute ->
+                updateMinute(
+                    MinuteUpdate(
+                        id_edl = minute.id_edl,
+                        id_element = minute.id_element,
+                        photos = minute.photos,
+                        remark = minute.remark,
+                        grade = minute.grade,
+                        number = minute.number,
+                        elementType = minute.elementType
+                    )
+                )
+            }
+        }
         _state.value = _state.value.copy(roomName = roomName)
     }
 }

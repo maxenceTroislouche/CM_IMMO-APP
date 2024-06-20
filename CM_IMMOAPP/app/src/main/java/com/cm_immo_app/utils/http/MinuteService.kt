@@ -7,9 +7,11 @@ import retrofit2.http.PATCH
 data class MinuteUpdate(
     val id_edl: Int,
     val id_element: Int,
+    val photos: List<String>,
     val remark: String,
     val grade: Int,
-    val photos: List<String>
+    val number: Int,
+    val elementType: String
 )
 
 interface MinuteService {

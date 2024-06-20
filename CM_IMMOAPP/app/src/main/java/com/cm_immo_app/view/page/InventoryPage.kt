@@ -1,6 +1,7 @@
 package com.cm_immo_app.view.page
 
 import android.content.Context
+import android.view.MenuItem
 import android.view.View
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedContent
@@ -73,12 +74,12 @@ fun ConditionCards(
         when (dismissDirection.value) {
             1 -> {
                 delay(300)
-                onCardSwiped((cardIndex + 1) % titles.size)
+                onCardSwiped((cardIndex + 1))
                 dismissDirection.value = 0
             }
             -1 -> {
                 delay(300)
-                onCardSwiped((cardIndex - 1 + titles.size) % titles.size)
+                onCardSwiped((cardIndex - 1 + titles.size))
                 dismissDirection.value = 0
             }
         }
@@ -132,6 +133,7 @@ fun ConditionCards(
         }
     }
 }
+
 
 @Composable
 fun ImageFullScreenDialog(imageString: String, onDismiss: () -> Unit) {
@@ -308,12 +310,12 @@ fun InventoryPage(
     encodeFileToBase64: (filePath: String) -> String?,
     updateMinute: (minute: MinuteUpdate) -> Unit,
     navigateBack: () -> Unit,
-    setCurrentRoom: (roomName: String) -> Unit // Add setCurrentRoom function
+    setCurrentRoom: (roomName: String) -> Unit
 ) {
     val scrollState = rememberScrollState()
     var cardIndex by remember { mutableStateOf(0) }
-    val titles = listOf("État des Murs", "État du Sol")
-    val images = listOf(state.wallImages, state.wallImages)
+    val titles = listOf("État des Murs", "État du Sol") // Add a third slide
+    val images = listOf(state.wallImages, state.wallImages, state.wallImages)
     val context = LocalContext.current
 
     // State for menu visibility
@@ -358,7 +360,17 @@ fun InventoryPage(
                 startCamera,
                 setSelectedEmoji,
             ) { newIndex ->
-                cardIndex = newIndex % titles.size
+                if (newIndex >= titles.size) {
+                    val currentRoomIndex = state.rooms.indexOfFirst { it.description == state.roomName }
+                    if (currentRoomIndex < state.rooms.size - 1) {
+                        val nextRoom = state.rooms[currentRoomIndex + 1]
+                        setCurrentRoom(nextRoom.description)
+                        setRoomName(nextRoom.description)
+                        cardIndex = 0
+                    }
+                } else {
+                    cardIndex = newIndex % titles.size
+                }
             }
         }
         Box(
