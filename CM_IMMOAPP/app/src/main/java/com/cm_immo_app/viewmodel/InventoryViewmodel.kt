@@ -143,33 +143,28 @@ class InventoryViewmodel : ViewModel() {
         return base64Encoded
     }
 
-    fun sendPhoto(path: String?) {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (path == null) {
-                exitProcess(-1)
-            }
-            Log.i("EDLViewmodel", "$path")
-            val b64 = encodeFileToBase64(path)
-            if (b64 == null) {
-                Log.e("EDLViewmodel", "Impossible d'obtenir le b64")
-                exitProcess(-1)
-            }
-
-            val call = RetrofitHelper
-                .inventoryService
-                .sendFiles(ImageData(b64))
-
-            val response = call.execute()
-            Log.i("EDLViewmodel", "$response")
-        }
-    }
-
     fun updateMinute(minute: MinuteUpdate) {
         viewModelScope.launch(Dispatchers.IO) {
             Log.i("EDLViewmodel", "$minute")
         }
 
         // TODO: continuer la fonction
+    }
+
+    fun getInventoryData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val call = RetrofitHelper
+                .inventoryService
+                .getInventoryData(state.value.inventoryId, "Bearer ${state.value.token}")
+
+            val response = call.execute()
+            if (response.isSuccessful) {
+                Log.i("InventoryViewModel", "getInventoryData réussie")
+                Log.i("InventoryViewModel", "${response.body()}")
+            } else {
+                Log.e("InventoryViewModel", "Echec de la récupération des données d'edl: inventoryId: ${state.value.inventoryId} / token: ${state.value.token}")
+            }
+        }
     }
 }
 

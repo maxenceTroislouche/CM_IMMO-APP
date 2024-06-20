@@ -40,6 +40,7 @@ fun NavGraphBuilder.InventoryNavigation(navigateBack: () -> Unit) {
         inventoryViewmodel.setInventoryId(inventoryId)
         inventoryViewmodel.setProgress(50.0f)
         inventoryViewmodel.setWallImages(mutableListOf("https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"))
+        inventoryViewmodel.getInventoryData()
         val state: InventoryState by inventoryViewmodel.state
         InventoryPage(
             state = state,
