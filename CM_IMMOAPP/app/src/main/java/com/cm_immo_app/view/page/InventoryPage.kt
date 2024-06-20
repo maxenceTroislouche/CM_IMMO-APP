@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.animateDpAsState
@@ -15,6 +16,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.with
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
@@ -148,18 +150,31 @@ fun ImageFullScreenDialog(imageString: String, onDismiss: () -> Unit) {
 
 @Composable
 fun EmojiFeedback(state: InventoryState, setSelectedEmoji: (selectedEmoji: String) -> Unit) {
+    var selectedEmoji by remember { mutableStateOf<String?>(null) }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         state.emojis.forEach { emoji ->
-            Text(
-                text = emoji,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.clickable {
-                    setSelectedEmoji(emoji)
-                }
-            )
+            Box(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(if (selectedEmoji == emoji) Color.LightGray else Color.Transparent)
+                    .border(2.dp, if (selectedEmoji == emoji) Color.Blue else Color.Gray, RoundedCornerShape(8.dp))
+                    .clickable {
+                        selectedEmoji = emoji
+                        setSelectedEmoji(emoji)
+                    }
+                    .padding(20.dp)
+            ) {
+                Text(
+                    text = emoji,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (selectedEmoji == emoji) Color.Blue else Color.Black
+                )
+            }
         }
     }
 }
@@ -299,12 +314,9 @@ fun InventoryPage(
     val images = listOf(state.wallImages, state.wallImages)
     val context = LocalContext.current
 
-    // Dégradé de fond
-    val gradient = Brush.verticalGradient(
-        colors = listOf(Color.Transparent, Color(0xFF8BC83F)),
-        startY = 0f,
-        endY = 1000f
-    )
+    // State for menu visibility
+    var isMenuVisible by remember { mutableStateOf(false) }
+    val selectedRoom = "Couloir" // Change this based on the actual selected room
 
     Box(
         modifier = Modifier
@@ -357,7 +369,11 @@ fun InventoryPage(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .background(gradient)
+                    .background(Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, Color(0xFF8BC83F)),
+                        startY = 0f,
+                        endY = 1000f
+                    ))
                     .align(Alignment.BottomCenter)
             )
             Box(
@@ -368,14 +384,87 @@ fun InventoryPage(
             ) {
                 CaptureButton(onCaptureClick = {
                     capturePhoto(context) { uri ->
-
-                        // Envoyer la photo de la signature avec les infos correspondantes
-
-                        // Rediriger vers la page de signature suivante OU liste des biens
-
+                        // Handle the captured photo URI here if needed
                     }
                 })
             }
         }
+        // Menu icon
+        Icon(
+            painter = painterResource(id = R.drawable.ic_menu), // Replace with your menu icon
+            contentDescription = "Menu",
+            modifier = Modifier
+                .size(48.dp)
+                .padding(16.dp)
+                .clickable { isMenuVisible = true }
+                .align(Alignment.TopStart)
+        )
+
+        // Slide-out menu
+        AnimatedVisibility(
+            visible = isMenuVisible,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f))
+            ) {
+                Column(
+                    modifier = Modifier
+                        .width(300.dp)
+                        .fillMaxHeight()
+                        .background(Color.White)
+                        .padding(16.dp)
+                        .align(Alignment.CenterStart)
+                ) {
+                    // Arrow to hide menu
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_arrow_back), // Replace with your arrow icon
+                        contentDescription = "Back",
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clickable { isMenuVisible = false }
+                            .align(Alignment.Start)
+                    )
+                    Text(
+                        text = "Résumé",
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    MenuItem("Couloir", selectedRoom)
+                    MenuItem("Cuisine", selectedRoom)
+                    MenuItem("Salle de bain", selectedRoom)
+                    MenuItem("Chambres 1", selectedRoom)
+                    MenuItem("Chambres 2", selectedRoom)
+                    MenuItem("Chambres 3", selectedRoom)
+                    Spacer(modifier = Modifier.weight(1f))
+                    Button(
+                        onClick = { /* Handle exit inventory and return to detail page */ },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC8473F)),
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) {
+                        Text("Retour Menu")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MenuItem(roomName: String, selectedRoom: String) {
+    val isSelected = roomName == selectedRoom
+    Button(
+        onClick = { /* Handle room navigation */ },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isSelected) Color(0xFF8BC83F) else Color(0xFF234F68),
+            contentColor = Color.White
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ) {
+        Text(roomName)
     }
 }
