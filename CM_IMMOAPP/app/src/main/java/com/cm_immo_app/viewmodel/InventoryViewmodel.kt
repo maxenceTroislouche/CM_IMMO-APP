@@ -164,4 +164,7 @@ class InventoryViewmodel : ViewModel() {
             }
         }
     }
+    fun setCurrentRoom(roomName: String) {
+        _state.value = _state.value.copy(roomName = roomName)
+    }
 }

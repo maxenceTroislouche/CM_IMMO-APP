@@ -52,7 +52,8 @@ fun NavGraphBuilder.InventoryNavigation(navigateBack: () -> Unit) {
             capturePhoto = inventoryViewmodel::capturePhoto,
             encodeFileToBase64 = inventoryViewmodel::encodeFileToBase64,
             updateMinute = inventoryViewmodel::updateMinute,
-            navigateBack = navigateBack
+            navigateBack = navigateBack,
+            setCurrentRoom = inventoryViewmodel::setCurrentRoom
         )
     }
 }

@@ -307,7 +307,8 @@ fun InventoryPage(
     capturePhoto: (context: Context, onImageCaptured: (String?) -> Unit) -> Unit,
     encodeFileToBase64: (filePath: String) -> String?,
     updateMinute: (minute: MinuteUpdate) -> Unit,
-    navigateBack: () -> Unit // Add navigateBack parameter
+    navigateBack: () -> Unit,
+    setCurrentRoom: (roomName: String) -> Unit
 ) {
     val scrollState = rememberScrollState()
     var cardIndex by remember { mutableStateOf(0) }
@@ -317,7 +318,6 @@ fun InventoryPage(
 
     // State for menu visibility
     var isMenuVisible by remember { mutableStateOf(false) }
-    val selectedRoom = state.roomName // Use actual selected room from state
 
     Box(
         modifier = Modifier
@@ -442,7 +442,15 @@ fun InventoryPage(
                     )
                     // Dynamically create menu items based on rooms
                     state.rooms.forEach { room ->
-                        MenuItem(room.description, selectedRoom)
+                        MenuItem(
+                            roomName = room.description,
+                            selectedRoom = state.roomName,
+                            onClick = {
+                                setCurrentRoom(room.description)
+                                setRoomName(room.description) // Change the room name in the state
+                                isMenuVisible = false
+                            }
+                        )
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     Button(
@@ -459,10 +467,10 @@ fun InventoryPage(
 }
 
 @Composable
-fun MenuItem(roomName: String, selectedRoom: String) {
+fun MenuItem(roomName: String, selectedRoom: String, onClick: () -> Unit) {
     val isSelected = roomName == selectedRoom
     Button(
-        onClick = { /* Handle room navigation */ },
+        onClick = onClick,
         colors = ButtonDefaults.buttonColors(
             containerColor = if (isSelected) Color(0xFF8BC83F) else Color(0xFF234F68),
             contentColor = Color.White
