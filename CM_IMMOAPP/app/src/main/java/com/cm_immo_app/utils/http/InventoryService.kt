@@ -5,7 +5,7 @@ import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
-import retrofit2.http.POST
+import retrofit2.http.PATCH
 import retrofit2.http.Path
 
 data class ImageData(
@@ -54,7 +54,9 @@ data class InventoryData(
     val rooms: List<Room>,
 )
 
-
+data class ProgressData(
+    val progress: Int,
+)
 
 interface InventoryService {
     @GET("immotepAPI/v1/inventories/{id}")
@@ -62,4 +64,11 @@ interface InventoryService {
         @Path("id") inventoryId: Int,
         @Header("Authorization") token: String
     ): Call<InventoryData>
+
+    @PATCH("immotepAPI/v1/inventories/{id}")
+    fun setProgress(
+        @Path("id") inventoryId: Int,
+        @Header("Authorization") token: String,
+        @Body body: ProgressData,
+    ): Call<ResponseBody>
 }

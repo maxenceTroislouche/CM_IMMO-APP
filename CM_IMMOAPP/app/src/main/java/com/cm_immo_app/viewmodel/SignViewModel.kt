@@ -117,7 +117,6 @@ class SignViewModel : ViewModel() {
                 Log.i("SignViewModel", "Envoi signature OK !")
                 Log.i("SignViewModel", "${response.toString()}")
             }
-            setError(true)
         }
     }
 }

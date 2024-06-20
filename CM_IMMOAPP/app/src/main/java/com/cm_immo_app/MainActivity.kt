@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
                     },
                     navigateBack = { navController.popBackStack() }
                 )
-                InventoryNavigation(navigateBack = { navController.popBackStack() }) // Pass navigateBack function
+                InventoryNavigation(navigateBack = { navController.popBackStack() }, navController::navigateToSignPage) // Pass navigateBack function
                 SignNavigation(
                     navController::navigateToSignPage,
                     navController::navigateToPropertiesListPage,

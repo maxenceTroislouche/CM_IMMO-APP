@@ -45,7 +45,7 @@ fun PropertiesListPage(
         radius = 800f
     )
 
-    LaunchedEffect(token) {
+    LaunchedEffect(Unit) {
         getProperties()
     }
 

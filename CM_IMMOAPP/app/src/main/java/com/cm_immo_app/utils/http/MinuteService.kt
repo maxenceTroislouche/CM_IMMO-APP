@@ -1,5 +1,7 @@
 package com.cm_immo_app.utils.http
 
+import okhttp3.ResponseBody
+import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.PATCH
@@ -16,5 +18,5 @@ data class MinuteUpdate(
 
 interface MinuteService {
     @PATCH("immotepAPI/v1/minutes/")
-    fun updateMinute(@Header("Authorization") token: String, @Body minuteToUpdate: MinuteUpdate)
+    fun updateMinute(@Header("Authorization") token: String, @Body minuteToUpdate: MinuteUpdate): Call<ResponseBody>
 }

@@ -1,7 +1,7 @@
 package com.cm_immo_app.view.page
 
 import android.content.Context
-import android.view.MenuItem
+import android.util.Log
 import android.view.View
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedContent
@@ -51,7 +51,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.lifecycle.LifecycleOwner
 import coil.compose.AsyncImage
 import com.cm_immo_app.state.InventoryState
+import com.cm_immo_app.utils.http.InventoryData
+import com.cm_immo_app.utils.http.Minute
 import com.cm_immo_app.utils.http.MinuteUpdate
+import com.cm_immo_app.utils.http.Room
+import kotlinx.coroutines.selects.select
+import kotlin.math.min
 
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -62,7 +67,8 @@ fun ConditionCards(
     imagesList: List<List<String>>,
     state: InventoryState,
     startCamera: (context: Context, lifecycleOwner: LifecycleOwner, previewView: PreviewView) -> Unit,
-    setSelectedEmoji: (selectedEmoji: String) -> Unit,
+    setGrade: (emoji: String) -> Unit,
+    setNoteText: (noteText: String) -> Unit,
     onCardSwiped: (Int) -> Unit
 ) {
     val cardWidth = 600.dp
@@ -124,7 +130,8 @@ fun ConditionCards(
                 ConditionCard(
                     state,
                     startCamera,
-                    setSelectedEmoji,
+                    setGrade,
+                    setNoteText,
                     titles[targetCardIndex],
                     imageList,
                     Modifier.offset { IntOffset(animatedOffset.roundToInt(), 0) }
@@ -151,23 +158,32 @@ fun ImageFullScreenDialog(imageString: String, onDismiss: () -> Unit) {
 }
 
 @Composable
-fun EmojiFeedback(state: InventoryState, setSelectedEmoji: (selectedEmoji: String) -> Unit) {
-    var selectedEmoji by remember { mutableStateOf<String?>(null) }
-
+fun EmojiFeedback(state: InventoryState, setGrade: (Emoji: String) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
+        val indexEmoji = state.rooms[state.currentRoom!!].minutes[state.currentMinute!!].grade
+        var selectedEmoji: String? = null
+
+        if (indexEmoji in 0..5) {
+            selectedEmoji = state.emojis[indexEmoji]
+        }
+
         state.emojis.forEach { emoji ->
             Box(
                 modifier = Modifier
                     .padding(8.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(if (selectedEmoji == emoji) Color.LightGray else Color.Transparent)
-                    .border(2.dp, if (selectedEmoji == emoji) Color.Blue else Color.Gray, RoundedCornerShape(8.dp))
+                    .border(
+                        2.dp,
+                        if (selectedEmoji == emoji) Color.Blue else Color.Gray,
+                        RoundedCornerShape(8.dp)
+                    )
                     .clickable {
                         selectedEmoji = emoji
-                        setSelectedEmoji(emoji)
+                        setGrade(emoji)
                     }
                     .padding(20.dp)
             ) {
@@ -183,11 +199,12 @@ fun EmojiFeedback(state: InventoryState, setSelectedEmoji: (selectedEmoji: Strin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NoteSection(state: InventoryState) {
-    var text by remember { mutableStateOf("") }
+fun NoteSection(state: InventoryState, setNoteText: (noteText: String) -> Unit) {
+    val remark = state.rooms[state.currentRoom!!].minutes[state.currentMinute!!].remark
+
     TextField(
-        value = text,
-        onValueChange = { text = it },
+        value = remark,
+        onValueChange = { setNoteText(it) },
         label = { Text("Notes", textAlign = TextAlign.Center) },
         placeholder = { Text("Add your notes here", textAlign = TextAlign.Center) },
         singleLine = false,
@@ -204,7 +221,8 @@ fun NoteSection(state: InventoryState) {
 fun ConditionCard(
     state: InventoryState,
     startCamera: (context: Context, lifecycleOwner: LifecycleOwner, previewView: PreviewView) -> Unit,
-    setSelectedEmoji: (selectedEmoji: String) -> Unit,
+    setGrade: (emoji: String) -> Unit,
+    setNoteText: (noteText: String) -> Unit,
     title: String,
     images: List<String>,
     modifier: Modifier = Modifier
@@ -266,9 +284,9 @@ fun ConditionCard(
             }
 
             Spacer(modifier = Modifier.height(25.dp))
-            EmojiFeedback(state, setSelectedEmoji)
+            EmojiFeedback(state, setGrade)
             Spacer(modifier = Modifier.height(25.dp))
-            NoteSection(state)
+            NoteSection(state, setNoteText)
         }
     }
 }
@@ -301,21 +319,38 @@ fun CaptureButton(onCaptureClick: () -> Unit) {
 @Composable
 fun InventoryPage(
     state: InventoryState,
-    setProgress: (progress: Float) -> Unit,
-    setRoomName: (roomName: String) -> Unit,
-    setWallImages: (wallImages: List<String>) -> Unit,
-    setSelectedEmoji: (selectedEmoji: String) -> Unit,
+    setProgress: (progress: Int) -> Unit,
+    setNoteText: (noteText: String) -> Unit,
+    setGrade: (emoji: String) -> Unit,
     startCamera: (context: Context, lifecycleOwner: LifecycleOwner, previewView: PreviewView) -> Unit,
     capturePhoto: (context: Context, onImageCaptured: (String?) -> Unit) -> Unit,
     encodeFileToBase64: (filePath: String) -> String?,
     updateMinute: (minute: MinuteUpdate) -> Unit,
     navigateBack: () -> Unit,
-    setCurrentRoom: (roomName: String) -> Unit
+    setCurrentRoom: (roomIndex: Int) -> Unit,
+    setCurrentMinute: (minuteIndex: Int) -> Unit,
+    getInventoryData: () -> Unit,
+    addPhoto: (path: String) -> Unit,
+    navigateToSignPage: (token: String, type: String, inventoryId: Int) -> Unit
 ) {
+    LaunchedEffect(state.token) {
+        getInventoryData()
+    }
+
+    Log.i("InventoryPage", "state: $state")
     val scrollState = rememberScrollState()
     var cardIndex by remember { mutableStateOf(0) }
-    val titles = listOf("État des Murs", "État du Sol") // Add a third slide
-    val images = listOf(state.wallImages, state.wallImages, state.wallImages)
+    val titles = mutableListOf<String>()
+    val images = mutableListOf<List<String>>()
+
+    if (state.currentRoom != null) {
+        state.rooms[state.currentRoom].minutes.forEach { minute: Minute ->
+            titles.add("Etat de ${minute.elementType}")
+            images.add(minute.photos)
+        }
+    }
+
+    // val titles = listOf("État des Murs", "État du Sol") // Add a third slide
     val context = LocalContext.current
 
     // State for menu visibility
@@ -334,7 +369,7 @@ fun InventoryPage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LinearProgressIndicator(
-                progress = state.progress,
+                progress = state.progress.toFloat(),
                 color = Color(0xFF8BC83F),
                 trackColor = Color(0xFFEBF3F2),
                 modifier = Modifier
@@ -344,8 +379,14 @@ fun InventoryPage(
                     .clip(RoundedCornerShape(35.dp))
             )
             Spacer(modifier = Modifier.height(16.dp))
+
+            var roomname = ""
+            if (state.currentRoom != null) {
+                roomname = state.rooms[state.currentRoom].description
+            }
+
             Text(
-                text = state.roomName,
+                text = roomname,
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .align(Alignment.Start)
@@ -358,14 +399,18 @@ fun InventoryPage(
                 images,
                 state,
                 startCamera,
-                setSelectedEmoji,
+                setGrade,
+                setNoteText,
             ) { newIndex ->
                 if (newIndex >= titles.size) {
-                    val currentRoomIndex = state.rooms.indexOfFirst { it.description == state.roomName }
-                    if (currentRoomIndex < state.rooms.size - 1) {
-                        val nextRoom = state.rooms[currentRoomIndex + 1]
-                        setCurrentRoom(nextRoom.description)
-                        setRoomName(nextRoom.description)
+                    Log.i(
+                        "InventoryPage",
+                        "affecte la pièce courante à ${state.rooms[state.currentRoom?.plus(1)!!]}"
+                    )
+
+                    if (state.currentRoom!! < state.rooms.size - 1) {
+                        setCurrentRoom(state.currentRoom?.plus(1) ?: 0)
+                        // setRoomName(nextRoom.description)
                         cardIndex = 0
                     }
                 } else {
@@ -382,11 +427,13 @@ fun InventoryPage(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .background(Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color(0xFF8BC83F)),
-                        startY = 0f,
-                        endY = 1000f
-                    ))
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color(0xFF8BC83F)),
+                            startY = 0f,
+                            endY = 1000f
+                        )
+                    )
                     .align(Alignment.BottomCenter)
             )
             Box(
@@ -397,7 +444,10 @@ fun InventoryPage(
             ) {
                 CaptureButton(onCaptureClick = {
                     capturePhoto(context) { uri ->
-                        // Handle the captured photo URI here if needed
+                        // Ajoute la photo dans le state rooms
+                        if (uri != null) {
+                            addPhoto(uri)
+                        }
                     }
                 })
             }
@@ -452,18 +502,35 @@ fun InventoryPage(
                         text = "Résumé",
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
+                    Text(
+                        text = "Progrès: ${state.progress}",
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
                     // Dynamically create menu items based on rooms
                     state.rooms.forEach { room ->
                         MenuItem(
                             roomName = room.description,
-                            selectedRoom = state.roomName,
+                            selectedRoom = room.description,
                             onClick = {
-                                setCurrentRoom(room.description)
-                                setRoomName(room.description) // Change the room name in the state
+                                Log.i("InventoryPage", "Changement de pièce: $room")
+                                setCurrentRoom(state.rooms.indexOf(room))
+                                // setRoomName(room.description) // Change the room name in the state
                                 isMenuVisible = false
                             }
                         )
                     }
+                    if (state.progress >= 100) {
+                        Spacer(modifier = Modifier.weight(1f))
+                        Button(
+                            onClick = { navigateToSignPage(state.token, "LOCATAIRE", state.inventoryId) },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        ) {
+                            Text("Signer")
+                        }
+                    }
+
+
                     Spacer(modifier = Modifier.weight(1f))
                     Button(
                         onClick = { navigateBack() }, // Use navigateBack function

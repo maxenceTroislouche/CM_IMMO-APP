@@ -11,7 +11,10 @@ import com.cm_immo_app.view.page.InventoryPage
 import com.cm_immo_app.viewmodel.InventoryViewmodel
 import kotlin.system.exitProcess
 
-fun NavGraphBuilder.InventoryNavigation(navigateBack: () -> Unit) {
+fun NavGraphBuilder.InventoryNavigation(
+    navigateBack: () -> Unit,
+    navigateToSignPage: (String, String, Int) -> Unit
+) {
     val inventoryViewmodel = InventoryViewmodel()
     composable(
         route = "InventoryPage/{token}/{inventoryId}",
@@ -38,22 +41,22 @@ fun NavGraphBuilder.InventoryNavigation(navigateBack: () -> Unit) {
 
         inventoryViewmodel.setToken(token)
         inventoryViewmodel.setInventoryId(inventoryId)
-        inventoryViewmodel.setProgress(50.0f)
-        inventoryViewmodel.setWallImages(mutableListOf("https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"))
-        inventoryViewmodel.getInventoryData()
         val state: InventoryState by inventoryViewmodel.state
         InventoryPage(
             state = state,
             setProgress = inventoryViewmodel::setProgress,
-            setRoomName = inventoryViewmodel::setRoomName,
-            setWallImages = inventoryViewmodel::setWallImages,
-            setSelectedEmoji = inventoryViewmodel::setSelectedEmoji,
+            setNoteText = inventoryViewmodel::setNoteText,
+            setGrade = inventoryViewmodel::setGrade,
             startCamera = inventoryViewmodel::startCamera,
             capturePhoto = inventoryViewmodel::capturePhoto,
             encodeFileToBase64 = inventoryViewmodel::encodeFileToBase64,
             updateMinute = inventoryViewmodel::updateMinute,
             navigateBack = navigateBack,
-            setCurrentRoom = inventoryViewmodel::setCurrentRoom
+            setCurrentRoom = inventoryViewmodel::setCurrentRoom,
+            setCurrentMinute = inventoryViewmodel::setCurrentMinute,
+            getInventoryData = inventoryViewmodel::getInventoryData,
+            addPhoto = inventoryViewmodel::addPhoto,
+            navigateToSignPage = navigateToSignPage,
         )
     }
 }
