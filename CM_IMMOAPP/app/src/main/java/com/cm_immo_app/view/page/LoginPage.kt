@@ -18,7 +18,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.window.DialogProperties
 import com.cm_immo_app.state.LoginState
+import com.cm_immo_app.view.components.ErrorPopup
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
@@ -26,6 +28,7 @@ fun LoginPage(
     state: LoginState,
     setUsername: (username: String) -> Unit,
     setPassword: (password: String) -> Unit,
+    setError: (Boolean) -> Unit,
     connect: () -> Unit,
     navigateToPropertiesList: (token: String) -> Unit,
 ) {
@@ -117,4 +120,10 @@ fun LoginPage(
             }
         }
     }
+    ErrorPopup(
+        error = state.error,
+        setError = setError,
+        title = "Erreur lors de la connexion",
+        content = "Veuillez vérifier vos identifiants / Vérifier que l'application est bien configurée !"
+    )
 }

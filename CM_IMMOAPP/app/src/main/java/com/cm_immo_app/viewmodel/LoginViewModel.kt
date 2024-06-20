@@ -12,9 +12,7 @@ import com.cm_immo_app.utils.http.AuthTokenResponse
 import com.cm_immo_app.utils.http.RetrofitHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import retrofit2.Response
-import retrofit2.await
 
 class LoginViewModel : ViewModel() {
 
@@ -33,6 +31,10 @@ class LoginViewModel : ViewModel() {
 
     fun setToken(token: String) {
         _state.value = _state.value.copy(token = token)
+    }
+
+    fun setError(error: Boolean) {
+        _state.value = _state.value.copy(error = error)
     }
 
     fun connect() {
@@ -61,6 +63,7 @@ class LoginViewModel : ViewModel() {
             }
             if (!navigated) {
                 Log.e("LoginViewModel", "Echec de la connexion")
+                setError(true)
             }
         }
     }

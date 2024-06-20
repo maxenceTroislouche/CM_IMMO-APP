@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.applyCanvas
 import com.cm_immo_app.state.SignState
+import com.cm_immo_app.view.components.ErrorPopup
 
 /**
  * Code original:
@@ -164,6 +165,7 @@ fun SignaturePad(
 @Composable
 fun SignaturePage(
     state: SignState,
+    setError: (Boolean) -> Unit,
     saveSignature: (bitmap: Bitmap, context: Context, onSaved: (String?) -> Unit) -> Unit,
     navigateToSignPage: (token: String, type: String, inventoryId: Int) -> Unit,
     navigateToPropertiesListPage: (token: String) -> Unit,
@@ -205,5 +207,12 @@ fun SignaturePage(
                 )
             }
         }
+    )
+
+    ErrorPopup(
+        error = state.error,
+        setError = setError,
+        title = "Une erreur est survenue",
+        content = "Erreur lors de l'envoi de la signature: {token: ${state.token} / type: ${state.type} / inventoryId: ${state.inventoryId}}"
     )
 }
