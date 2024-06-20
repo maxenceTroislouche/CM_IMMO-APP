@@ -31,6 +31,10 @@ class PropertiesListViewModel() : ViewModel() {
         _state.value = _state.value.copy(token = newToken)
     }
 
+    fun setError(error: Boolean) {
+        _state.value = _state.value.copy(error = error)
+    }
+
     fun getProperties() {
         viewModelScope.launch(Dispatchers.IO) {
             val call: Call<List<PropertiesResponseData>> = RetrofitHelper
@@ -60,6 +64,7 @@ class PropertiesListViewModel() : ViewModel() {
             } else {
                 Log.e(ContentValues.TAG, "PropertiesList: Echec lors de la récupération des biens pour : ${state.value.token} / ${response.errorBody()
                     ?.string()}")
+                setError(true)
             }
         }
     }

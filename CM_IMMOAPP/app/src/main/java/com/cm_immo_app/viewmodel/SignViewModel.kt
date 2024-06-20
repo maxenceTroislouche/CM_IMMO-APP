@@ -37,6 +37,10 @@ class SignViewModel : ViewModel() {
         _state.value = _state.value.copy(inventoryId = inventoryId)
     }
 
+    fun setError(error: Boolean) {
+        _state.value = _state.value.copy(error = error)
+    }
+
     private fun getRealPathFromURI(context: Context, uri: Uri): String? {
         val projection = arrayOf(MediaStore.Images.Media.DATA)
         val cursor = context.contentResolver.query(uri, projection, null, null, null)
@@ -108,10 +112,12 @@ class SignViewModel : ViewModel() {
             if (!response.isSuccessful) {
                 Log.i("SignViewModel", "${response.code()}")
                 Log.i("SignViewModel", "${response.raw()}")
+                setError(true)
             } else {
                 Log.i("SignViewModel", "Envoi signature OK !")
                 Log.i("SignViewModel", "${response.toString()}")
             }
+            setError(true)
         }
     }
 }

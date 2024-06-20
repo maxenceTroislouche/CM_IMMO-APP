@@ -22,10 +22,11 @@ fun NavGraphBuilder.LoginNavigation(
             state = state,
             setUsername = loginViewModel::setUsername,
             setPassword = loginViewModel::setPassword,
+            setError = loginViewModel::setError,
             connect = loginViewModel::connect,
             navigateToPropertiesList = navigateToPropertiesList,
         )
         // TODO: test chlag pour tester les signatures
-        //navigateToSignPage("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3MTg4MjM5MzAsImV4cCI6MTcxOTQyODczMH0.t4GswOBKwN5DDTLyRmq66yWDyVCYWcYeLKDB0wvGEoU", "LOCATAIRE", 1)
+        // navigateToSignPage("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3MTg4ODY5OTIsImV4cCI6MTcxOTQ5MTc5Mn0.ebSpBXcwPrDzMQnUpcDw8e1Dca6PdtBBkz9pMO9TS0Y", "LOCATAIRE", 1)
     }
 }

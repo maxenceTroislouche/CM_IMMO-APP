@@ -46,6 +46,7 @@ fun NavGraphBuilder.PropertyNavigation(
         val state: PropertyState by propertyViewModel.state
         PropertyPage(
             state = state,
+            setError = propertyViewModel::setError,
             navigateBack = navigateBack, // Pass the navigateBack function
             navigateToInventoryPage = navigateToInventoryPage,
             getPropertyData = propertyViewModel::getPropertyData,

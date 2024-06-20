@@ -47,13 +47,14 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.cm_immo_app.models.PropertyDetails
 import com.cm_immo_app.state.PropertyState
-
+import com.cm_immo_app.view.components.ErrorPopup
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PropertyPage(
     state: PropertyState,
+    setError: (Boolean) -> Unit,
     navigateBack: () -> Unit,
     navigateToInventoryPage: (token: String, inventoryId: Int) -> Unit,
     getPropertyData: () -> Unit,
@@ -204,6 +205,12 @@ fun PropertyPage(
             }
         }
     }
+    ErrorPopup(
+        error = state.error,
+        setError = setError,
+        title = "Une erreur est survenue",
+        content = "Une erreur est survenue lors de la récupération des informations du bien : {token: ${state.token} / propertyId: ${state.propertyId}}"
+    )
 }
 
 @Composable

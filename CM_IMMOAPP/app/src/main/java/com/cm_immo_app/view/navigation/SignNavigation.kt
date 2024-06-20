@@ -53,11 +53,12 @@ fun NavGraphBuilder.SignNavigation(
         val state: SignState by signViewModel.state
 
         SignaturePage(
-            state,
-            signViewModel::saveSignature,
-            navigateToSignPage,
-            navigateToPropertiesListPage,
-            signViewModel::sendSignature,
+            state = state,
+            setError = signViewModel::setError,
+            saveSignature = signViewModel::saveSignature,
+            navigateToSignPage = navigateToSignPage,
+            navigateToPropertiesListPage = navigateToPropertiesListPage,
+            sendSignature = signViewModel::sendSignature,
         )
     }
 }

@@ -39,6 +39,7 @@ fun NavGraphBuilder.PropertiesListNavigation(
             state = state,
             navigateToPropertiesPage = navigateToPropertiesPage,
             getProperties = propertiesListViewModel::getProperties,
+            setError = propertiesListViewModel::setError,
         )
     }
 }

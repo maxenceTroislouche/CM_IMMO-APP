@@ -25,6 +25,7 @@ import coil.compose.AsyncImage
 import com.cm_immo_app.R
 import com.cm_immo_app.models.PropertySimple
 import com.cm_immo_app.state.PropertiesListState
+import com.cm_immo_app.view.components.ErrorPopup
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,6 +34,7 @@ fun PropertiesListPage(
     state: PropertiesListState,
     navigateToPropertiesPage: (token: String, propertyId: Int) -> Unit,
     getProperties: () -> Unit,
+    setError: (Boolean) -> Unit,
 ) {
     val properties = state.properties
     val token = state.token
@@ -87,6 +89,12 @@ fun PropertiesListPage(
             }
         }
     }
+    ErrorPopup(
+        error = state.error,
+        setError = setError,
+        title = "Une erreur est survenue",
+        content = "Une erreur est survenue lors de la récupération des biens: {token: ${state.token}}"
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

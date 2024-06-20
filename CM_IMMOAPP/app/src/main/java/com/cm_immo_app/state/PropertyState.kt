@@ -6,4 +6,5 @@ data class PropertyState(
     val token: String = "",
     val propertyId: Int = -1,
     val property: PropertyDetails? = null,
+    val error: Boolean = false,
 )

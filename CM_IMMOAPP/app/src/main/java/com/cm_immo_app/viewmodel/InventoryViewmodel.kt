@@ -20,7 +20,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cm_immo_app.state.InventoryState
-import com.cm_immo_app.utils.http.ImageData
 import com.cm_immo_app.utils.http.MinuteUpdate
 import com.cm_immo_app.utils.http.RetrofitHelper
 import com.cm_immo_app.utils.http.Room
@@ -30,6 +29,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Base64
 import java.util.Locale
+
 
 class InventoryViewmodel : ViewModel() {
     private val _state: MutableState<InventoryState> = mutableStateOf(InventoryState())
