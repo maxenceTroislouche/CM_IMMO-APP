@@ -350,7 +350,6 @@ fun InventoryPage(
         }
     }
 
-    // val titles = listOf("État des Murs", "État du Sol") // Add a third slide
     val context = LocalContext.current
 
     // State for menu visibility
@@ -410,7 +409,6 @@ fun InventoryPage(
 
                     if (state.currentRoom!! < state.rooms.size - 1) {
                         setCurrentRoom(state.currentRoom?.plus(1) ?: 0)
-                        // setRoomName(nextRoom.description)
                         cardIndex = 0
                     }
                 } else {
@@ -508,13 +506,13 @@ fun InventoryPage(
                     )
                     // Dynamically create menu items based on rooms
                     state.rooms.forEach { room ->
+                        val isSelected = state.rooms.indexOf(room) == state.currentRoom
                         MenuItem(
                             roomName = room.description,
-                            selectedRoom = room.description,
+                            isSelected = isSelected,
                             onClick = {
                                 Log.i("InventoryPage", "Changement de pièce: $room")
                                 setCurrentRoom(state.rooms.indexOf(room))
-                                // setRoomName(room.description) // Change the room name in the state
                                 isMenuVisible = false
                             }
                         )
@@ -529,7 +527,6 @@ fun InventoryPage(
                             Text("Signer")
                         }
                     }
-
 
                     Spacer(modifier = Modifier.weight(1f))
                     Button(
@@ -546,8 +543,7 @@ fun InventoryPage(
 }
 
 @Composable
-fun MenuItem(roomName: String, selectedRoom: String, onClick: () -> Unit) {
-    val isSelected = roomName == selectedRoom
+fun MenuItem(roomName: String, isSelected: Boolean, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
