@@ -368,7 +368,7 @@ fun InventoryPage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LinearProgressIndicator(
-                progress = state.progress.toFloat(),
+                progress = state.progress / 100f,
                 color = Color(0xFF8BC83F),
                 trackColor = Color(0xFFEBF3F2),
                 modifier = Modifier
@@ -501,7 +501,7 @@ fun InventoryPage(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     Text(
-                        text = "Progrès: ${state.progress}",
+                        text = "Progrès: ${state.progress}%",
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     // Dynamically create menu items based on rooms
@@ -541,6 +541,7 @@ fun InventoryPage(
         }
     }
 }
+
 
 @Composable
 fun MenuItem(roomName: String, isSelected: Boolean, onClick: () -> Unit) {
