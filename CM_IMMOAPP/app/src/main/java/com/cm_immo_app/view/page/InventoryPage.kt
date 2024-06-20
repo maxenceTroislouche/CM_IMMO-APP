@@ -317,7 +317,7 @@ fun InventoryPage(
 
     // State for menu visibility
     var isMenuVisible by remember { mutableStateOf(false) }
-    val selectedRoom = "Couloir" // Change this based on the actual selected room
+    val selectedRoom = state.roomName // Use actual selected room from state
 
     Box(
         modifier = Modifier
@@ -440,12 +440,10 @@ fun InventoryPage(
                         text = "Résumé",
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
-                    MenuItem("Couloir", selectedRoom)
-                    MenuItem("Cuisine", selectedRoom)
-                    MenuItem("Salle de bain", selectedRoom)
-                    MenuItem("Chambres 1", selectedRoom)
-                    MenuItem("Chambres 2", selectedRoom)
-                    MenuItem("Chambres 3", selectedRoom)
+                    // Dynamically create menu items based on rooms
+                    state.rooms.forEach { room ->
+                        MenuItem(room.description, selectedRoom)
+                    }
                     Spacer(modifier = Modifier.weight(1f))
                     Button(
                         onClick = { navigateBack() }, // Use navigateBack function
@@ -459,7 +457,6 @@ fun InventoryPage(
         }
     }
 }
-
 
 @Composable
 fun MenuItem(roomName: String, selectedRoom: String) {

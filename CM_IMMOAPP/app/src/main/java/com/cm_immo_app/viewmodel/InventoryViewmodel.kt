@@ -23,14 +23,13 @@ import com.cm_immo_app.state.InventoryState
 import com.cm_immo_app.utils.http.ImageData
 import com.cm_immo_app.utils.http.MinuteUpdate
 import com.cm_immo_app.utils.http.RetrofitHelper
+import com.cm_immo_app.utils.http.Room
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Base64
 import java.util.Locale
-import kotlin.system.exitProcess
-
 
 class InventoryViewmodel : ViewModel() {
     private val _state: MutableState<InventoryState> = mutableStateOf(InventoryState())
@@ -63,6 +62,10 @@ class InventoryViewmodel : ViewModel() {
         _state.value = _state.value.copy(inventoryId = inventoryId)
     }
 
+    fun updateRooms(rooms: List<Room>) {
+        _state.value = _state.value.copy(rooms = rooms)
+    }
+
     private fun getRealPathFromURI(context: Context, uri: Uri): String? {
         val projection = arrayOf(MediaStore.Images.Media.DATA)
         val cursor = context.contentResolver.query(uri, projection, null, null, null)
@@ -89,7 +92,7 @@ class InventoryViewmodel : ViewModel() {
                     lifecycleOwner, cameraSelector, preview, imageCapture
                 )
             } catch (exc: Exception) {
-                Log.e("EDLViewModel", "Camera use case binding failed", exc)
+                Log.e("InventoryViewmodel", "Camera use case binding failed", exc)
             }
         }, ContextCompat.getMainExecutor(context))
     }
@@ -114,7 +117,7 @@ class InventoryViewmodel : ViewModel() {
             ContextCompat.getMainExecutor(context),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exc: ImageCaptureException) {
-                    Log.e("EDLViewModel", "Photo capture failed: ${exc.message}", exc)
+                    Log.e("InventoryViewmodel", "Photo capture failed: ${exc.message}", exc)
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
@@ -127,28 +130,21 @@ class InventoryViewmodel : ViewModel() {
     }
 
     fun encodeFileToBase64(filePath: String): String? {
-        // Lire le fichier en bytes
         val file = File(filePath)
 
         if (!file.exists()) {
-            Log.e("EDLViewmodel", "Le fichier n'existe pas")
+            Log.e("InventoryViewmodel", "File does not exist")
             return null
         }
 
         val fileBytes = file.readBytes()
-
-        // Encoder les bytes en base64
-        val base64Encoded = Base64.getEncoder().encodeToString(fileBytes)
-
-        return base64Encoded
+        return Base64.getEncoder().encodeToString(fileBytes)
     }
 
     fun updateMinute(minute: MinuteUpdate) {
         viewModelScope.launch(Dispatchers.IO) {
-            Log.i("EDLViewmodel", "$minute")
+            Log.i("InventoryViewmodel", "$minute")
         }
-
-        // TODO: continuer la fonction
     }
 
     fun getInventoryData() {
@@ -159,12 +155,13 @@ class InventoryViewmodel : ViewModel() {
 
             val response = call.execute()
             if (response.isSuccessful) {
-                Log.i("InventoryViewModel", "getInventoryData réussie")
-                Log.i("InventoryViewModel", "${response.body()}")
+                response.body()?.let { inventoryData ->
+                    updateRooms(inventoryData.rooms)
+                }
+                Log.i("InventoryViewmodel", "Successfully retrieved inventory data")
             } else {
-                Log.e("InventoryViewModel", "Echec de la récupération des données d'edl: inventoryId: ${state.value.inventoryId} / token: ${state.value.token}")
+                Log.e("InventoryViewmodel", "Failed to retrieve inventory data: inventoryId: ${state.value.inventoryId} / token: ${state.value.token}")
             }
         }
     }
 }
-
