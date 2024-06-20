@@ -307,6 +307,7 @@ fun InventoryPage(
     capturePhoto: (context: Context, onImageCaptured: (String?) -> Unit) -> Unit,
     encodeFileToBase64: (filePath: String) -> String?,
     updateMinute: (minute: MinuteUpdate) -> Unit,
+    navigateBack: () -> Unit // Add navigateBack parameter
 ) {
     val scrollState = rememberScrollState()
     var cardIndex by remember { mutableStateOf(0) }
@@ -389,13 +390,14 @@ fun InventoryPage(
                 })
             }
         }
+
         // Menu icon
         Icon(
-            painter = painterResource(id = R.drawable.ic_menu), // Replace with your menu icon
+            painter = painterResource(id = R.drawable.ic_menu),
             contentDescription = "Menu",
             modifier = Modifier
-                .size(48.dp)
-                .padding(16.dp)
+                .size(70.dp)
+                .padding(26.dp)
                 .clickable { isMenuVisible = true }
                 .align(Alignment.TopStart)
         )
@@ -419,15 +421,21 @@ fun InventoryPage(
                         .padding(16.dp)
                         .align(Alignment.CenterStart)
                 ) {
-                    // Arrow to hide menu
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_arrow_back), // Replace with your arrow icon
-                        contentDescription = "Back",
+                    Box(
                         modifier = Modifier
-                            .size(48.dp)
+                            .size(56.dp)
+                            .background(Color.Gray, shape = RoundedCornerShape(8.dp))
                             .clickable { isMenuVisible = false }
                             .align(Alignment.Start)
-                    )
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_arrow_back),
+                            contentDescription = "Back",
+                            modifier = Modifier
+                                .size(48.dp)
+                                .align(Alignment.Center)
+                        )
+                    }
                     Text(
                         text = "Résumé",
                         modifier = Modifier.padding(bottom = 16.dp)
@@ -440,17 +448,18 @@ fun InventoryPage(
                     MenuItem("Chambres 3", selectedRoom)
                     Spacer(modifier = Modifier.weight(1f))
                     Button(
-                        onClick = { /* Handle exit inventory and return to detail page */ },
+                        onClick = { navigateBack() }, // Use navigateBack function
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC8473F)),
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) {
-                        Text("Retour Menu")
+                        Text("Quitter")
                     }
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun MenuItem(roomName: String, selectedRoom: String) {

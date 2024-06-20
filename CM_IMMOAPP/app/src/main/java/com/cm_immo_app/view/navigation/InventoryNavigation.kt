@@ -11,7 +11,7 @@ import com.cm_immo_app.view.page.InventoryPage
 import com.cm_immo_app.viewmodel.InventoryViewmodel
 import kotlin.system.exitProcess
 
-fun NavGraphBuilder.InventoryNavigation() {
+fun NavGraphBuilder.InventoryNavigation(navigateBack: () -> Unit) {
     val inventoryViewmodel = InventoryViewmodel()
     composable(
         route = "InventoryPage/{token}/{inventoryId}",
@@ -43,14 +43,15 @@ fun NavGraphBuilder.InventoryNavigation() {
         val state: InventoryState by inventoryViewmodel.state
         InventoryPage(
             state = state,
-            inventoryViewmodel::setProgress,
-            inventoryViewmodel::setRoomName,
-            inventoryViewmodel::setWallImages,
-            inventoryViewmodel::setSelectedEmoji,
-            inventoryViewmodel::startCamera,
-            inventoryViewmodel::capturePhoto,
-            inventoryViewmodel::encodeFileToBase64,
-            inventoryViewmodel::updateMinute,
+            setProgress = inventoryViewmodel::setProgress,
+            setRoomName = inventoryViewmodel::setRoomName,
+            setWallImages = inventoryViewmodel::setWallImages,
+            setSelectedEmoji = inventoryViewmodel::setSelectedEmoji,
+            startCamera = inventoryViewmodel::startCamera,
+            capturePhoto = inventoryViewmodel::capturePhoto,
+            encodeFileToBase64 = inventoryViewmodel::encodeFileToBase64,
+            updateMinute = inventoryViewmodel::updateMinute,
+            navigateBack = navigateBack
         )
     }
 }

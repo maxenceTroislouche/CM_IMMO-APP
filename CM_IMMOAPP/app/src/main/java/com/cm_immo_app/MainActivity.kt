@@ -44,11 +44,11 @@ class MainActivity : ComponentActivity() {
                 PropertiesListNavigation(navController::navigateToPropertiesPage)
                 PropertyNavigation(
                     navigateToInventoryPage = { token, inventoryId ->
-                        navController.navigate("inventoryPage/$token/$inventoryId")
+                        navController.navigate("InventoryPage/$token/$inventoryId")
                     },
                     navigateBack = { navController.popBackStack() }
                 )
-                InventoryNavigation()
+                InventoryNavigation(navigateBack = { navController.popBackStack() }) // Pass navigateBack function
                 SignNavigation(
                     navController::navigateToSignPage,
                     navController::navigateToPropertiesListPage,
@@ -65,3 +65,4 @@ class MainActivity : ComponentActivity() {
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
     }
 }
+
