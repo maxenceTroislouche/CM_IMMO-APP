@@ -78,12 +78,12 @@ fun ConditionCards(
 
     LaunchedEffect(dismissDirection.value) {
         when (dismissDirection.value) {
-            1 -> {
+            -1 -> {
                 delay(300)
                 onCardSwiped((cardIndex + 1))
                 dismissDirection.value = 0
             }
-            -1 -> {
+            1 -> {
                 delay(300)
                 onCardSwiped((cardIndex - 1 + titles.size))
                 dismissDirection.value = 0
@@ -103,8 +103,8 @@ fun ConditionCards(
                     offsetX = 0f
                 }) { change, dragAmount ->
                     offsetX += (dragAmount / density)
-                    if (offsetX > 300f) dismissDirection.value = 1
                     if (offsetX < -300f) dismissDirection.value = -1
+                    if (offsetX > 300f) dismissDirection.value = 1
                     if (change.positionChange() != Offset.Zero) change.consume()
                 }
             }
@@ -117,11 +117,11 @@ fun ConditionCards(
             targetState = cardIndex,
             transitionSpec = {
                 if (targetState > initialState) {
-                    slideInHorizontally { width -> width } + fadeIn() with
-                            slideOutHorizontally { width -> -width } + fadeOut()
-                } else {
                     slideInHorizontally { width -> -width } + fadeIn() with
                             slideOutHorizontally { width -> width } + fadeOut()
+                } else {
+                    slideInHorizontally { width -> width } + fadeIn() with
+                            slideOutHorizontally { width -> -width } + fadeOut()
                 }.using(SizeTransform(clip = false))
             }
         ) { targetCardIndex ->
@@ -544,7 +544,7 @@ fun InventoryPage(
 
                     Spacer(modifier = Modifier.weight(1f))
                     Button(
-                        onClick = { navigateBack() }, // Use navigateBack function
+                        onClick = { navigateBack() },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC8473F)),
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) {
