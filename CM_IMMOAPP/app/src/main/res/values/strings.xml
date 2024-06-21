@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">CM_IMMO-APP</string>
+    <string name="app_name">Immotep</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="login">Se connecter</string>

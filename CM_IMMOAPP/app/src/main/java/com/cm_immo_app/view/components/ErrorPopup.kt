@@ -25,9 +25,6 @@ fun ErrorPopup(
             title = { Text(text = title) },
             text = { Text(text = content) },
             containerColor = Color.White,
-            modifier = Modifier
-                .border(1.dp, Color.Black, RoundedCornerShape(16.dp)),
-
             confirmButton = {
                 Button(
                     onClick = {
