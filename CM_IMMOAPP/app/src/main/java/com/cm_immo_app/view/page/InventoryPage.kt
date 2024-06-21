@@ -368,7 +368,7 @@ fun InventoryPage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LinearProgressIndicator(
-                progress = state.progress / 100f,
+                progress = state.progress.toFloat() / 100,
                 color = Color(0xFF8BC83F),
                 trackColor = Color(0xFFEBF3F2),
                 modifier = Modifier
@@ -379,18 +379,43 @@ fun InventoryPage(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            var roomname = ""
-            if (state.currentRoom != null) {
-                roomname = state.rooms[state.currentRoom].description
+            // Row for menu button and room name
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, top = 16.dp)
+            ) {
+                // Rectangular background for menu icon
+                Box(
+                    modifier = Modifier
+                        .background(Color.Gray, shape = RoundedCornerShape(8.dp))
+                        .border(2.dp, Color.Black, shape = RoundedCornerShape(8.dp))
+                        .clickable { isMenuVisible = true }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_menu),
+                        contentDescription = "Menu",
+                        modifier = Modifier
+                            .size(70.dp)
+                            .padding(26.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // Room name
+                var roomname = ""
+                if (state.currentRoom != null) {
+                    roomname = state.rooms[state.currentRoom].description
+                }
+                Text(
+                    text = roomname,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
             }
 
-            Text(
-                text = roomname,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(start = 16.dp)
-            )
             Spacer(modifier = Modifier.height(16.dp))
             ConditionCards(
                 cardIndex,
@@ -450,17 +475,6 @@ fun InventoryPage(
                 })
             }
         }
-
-        // Menu icon
-        Icon(
-            painter = painterResource(id = R.drawable.ic_menu),
-            contentDescription = "Menu",
-            modifier = Modifier
-                .size(70.dp)
-                .padding(26.dp)
-                .clickable { isMenuVisible = true }
-                .align(Alignment.TopStart)
-        )
 
         // Slide-out menu
         AnimatedVisibility(
@@ -541,7 +555,6 @@ fun InventoryPage(
         }
     }
 }
-
 
 @Composable
 fun MenuItem(roomName: String, isSelected: Boolean, onClick: () -> Unit) {
