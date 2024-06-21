@@ -438,6 +438,7 @@ fun InventoryPage(
                     }
                 } else {
                     cardIndex = newIndex % titles.size
+                    setCurrentMinute(cardIndex)
                 }
             }
         }
